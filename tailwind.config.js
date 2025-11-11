@@ -52,23 +52,23 @@ export default {
         json: {
           key: {
             light: '#0066cc',
-            dark: '#61afef'
+            dark: '#6db3f2'
           },
           string: {
             light: '#008000',
-            dark: '#98c379'
+            dark: '#a9dc76'
           },
           number: {
             light: '#d73a49',
-            dark: '#d19a66'
+            dark: '#fc9867'
           },
           boolean: {
             light: '#8250df',
-            dark: '#c678dd'
+            dark: '#ab9df2'
           },
           null: {
             light: '#6f42c1',
-            dark: '#e06c75'
+            dark: '#ff6188'
           }
         }
       },

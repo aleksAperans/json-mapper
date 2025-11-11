@@ -19,15 +19,11 @@ export function generateMarkdown(bookmarks: Bookmark[]): string {
 
   const header = `# JSON Mapper Bookmarks
 
-Generated: ${new Date().toLocaleString()}
-Total: ${bookmarks.length} ${bookmarks.length === 1 ? 'bookmark' : 'bookmarks'}
-
 `
 
   const bookmarksList = bookmarks
     .map((bookmark) => {
-      const value = formatValue(bookmark.value)
-      return `- \`${bookmark.path}\`: ${value}`
+      return `- \`${bookmark.path}\``
     })
     .join('\n')
 

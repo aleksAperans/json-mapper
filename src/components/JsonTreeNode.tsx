@@ -116,10 +116,10 @@ export function JsonTreeNode({ nodeKey, value, pathSegments, isLast = false, mat
   const getPreview = () => {
     if (!isExpandable) return ''
     if (isArray) {
-      return `Array(${(value as JsonValue[]).length})`
+      return `Array[${(value as JsonValue[]).length}]`
     }
     const keys = Object.keys(value as Record<string, JsonValue>)
-    return keys.length === 0 ? '{}' : `{${keys.length} ${keys.length === 1 ? 'key' : 'keys'}}`
+    return keys.length === 0 ? '{}' : `(${keys.length} ${keys.length === 1 ? 'key' : 'keys'})`
   }
 
   return (
@@ -142,7 +142,7 @@ export function JsonTreeNode({ nodeKey, value, pathSegments, isLast = false, mat
           onClick={handleCopyPath}
           title="Click to copy path"
         >
-          {isArray && !isNaN(Number(nodeKey)) ? `[${nodeKey}]` : `"${nodeKey}"`}
+          {isArray && !isNaN(Number(nodeKey)) ? `[${nodeKey}]` : nodeKey}
         </span>
         <span className="mx-2 text-gray-500">:</span>
 
