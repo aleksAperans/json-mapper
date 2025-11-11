@@ -182,7 +182,7 @@ export function TextView() {
 
           if (!isExpanded) {
             // Collapsed array
-            const content = `${keyPrefix}[ ... ] // ${value.length} items`
+            const content = `${keyPrefix}[ ... ] Array[${value.length}]`
             totalSearchMatches += countMatches(content)
             result.push({
               lineNumber: lineNumber++,
@@ -195,7 +195,7 @@ export function TextView() {
             })
           } else {
             // Expanded array
-            const content = `${keyPrefix}[`
+            const content = `${keyPrefix}[ Array[${value.length}]`
             totalSearchMatches += countMatches(content)
             result.push({
               lineNumber: lineNumber++,
@@ -236,7 +236,7 @@ export function TextView() {
 
         if (!isExpanded) {
           // Collapsed object
-          const content = `${keyPrefix}{ ... } // ${entries.length} keys`
+          const content = `${keyPrefix}{ ... } Object{${entries.length}}`
           totalSearchMatches += countMatches(content)
           result.push({
             lineNumber: lineNumber++,
@@ -261,7 +261,7 @@ export function TextView() {
           })
         } else {
           // Expanded object
-          const content = `${keyPrefix}{`
+          const content = `${keyPrefix}{ Object{${entries.length}}`
           totalSearchMatches += countMatches(content)
           result.push({
             lineNumber: lineNumber++,

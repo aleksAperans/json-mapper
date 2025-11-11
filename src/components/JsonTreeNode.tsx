@@ -275,7 +275,7 @@ export function JsonTreeNode({
       return `Array[${(value as JsonValue[]).length}]`
     }
     const keys = Object.keys(value as Record<string, JsonValue>)
-    return keys.length === 0 ? '{}' : `(${keys.length} ${keys.length === 1 ? 'key' : 'keys'})`
+    return keys.length === 0 ? '{}' : `Object{${keys.length}}`
   }
 
   return (
@@ -312,14 +312,14 @@ export function JsonTreeNode({
 
         {!isExpandable ? (
           <span className={truncateValues && !searchQuery.trim() ? 'truncate' : ''}>{renderValue()}</span>
-        ) : !isExpanded ? (
+        ) : (
           <span
             className="truncate text-gray-500 dark:text-gray-400 cursor-pointer"
             onClick={handleToggle}
           >
             {getPreview()}
           </span>
-        ) : null}
+        )}
 
         <button
           onClick={handleCopyPath}
