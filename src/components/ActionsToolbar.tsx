@@ -22,11 +22,15 @@ export function ActionsToolbar() {
     toggleHideEmpty,
     jsonData,
     fileSize,
+    metadata,
     pathFormat,
     setCopyNotification,
     bookmarks,
     setIsBookmarksOpen,
   } = useAppStore()
+
+  // For large files, "Expand All" will use depth-limited expansion
+  const isLargeFile = metadata?.nodeCount && metadata.nodeCount > 5000
 
   // For Query & Extract: get filtered data to enable/disable Copy All
   const extractedData = useMemo(() => {
@@ -106,7 +110,11 @@ export function ActionsToolbar() {
           <button
             onClick={expandAll}
             className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            title="Expand all nodes"
+            title={
+              isLargeFile
+                ? `Expand to depth 2 (large file: ${metadata?.nodeCount?.toLocaleString()} nodes)`
+                : "Expand all nodes"
+            }
           >
             <ChevronsDown className="h-4 w-4" />
             <span>Expand All</span>

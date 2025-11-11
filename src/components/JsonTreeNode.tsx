@@ -1,11 +1,15 @@
-import { ChevronRight, Bookmark, Copy } from 'lucide-react'
+import { ChevronRight, Bookmark, Copy, Plus, ChevronsDown } from 'lucide-react'
 import type { JsonValue } from '@/types'
 import { getJsonType } from '@/utils/pathGenerator'
 import { useAppStore } from '@/store/appStore'
 import { generatePath } from '@/utils/pathGenerator'
 import { copyToClipboard } from '@/utils/clipboard'
 import { shouldShowNode } from '@/utils/filter'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+
+// Lazy loading configuration
+const LAZY_LOAD_THRESHOLD = 100 // Start paginating when children exceed this
+const LAZY_LOAD_BATCH_SIZE = 50 // Load this many items per batch
 
 interface PathSegment {
   key: string
@@ -31,7 +35,7 @@ export function JsonTreeNode({
   emptyPaths = new Set(),
   hideEmpty = false
 }: JsonTreeNodeProps) {
-  const { pathFormat, setCurrentPath, setCopyNotification, expandedPaths, togglePath, addBookmark } = useAppStore()
+  const { pathFormat, setCurrentPath, setCopyNotification, expandedPaths, togglePath, addBookmark, expandSubtree, jsonData } = useAppStore()
 
   const valueType = getJsonType(value)
   const isExpandable = valueType === 'object' || valueType === 'array'
@@ -68,13 +72,43 @@ export function JsonTreeNode({
 
   // Determine if this node should be expanded
   // - If __EXPAND_ALL__ is active, expand everything
+  // - If __EXPAND_TO_DEPTH_2__ is active, expand up to depth 2
   // - If filter is active and node is on path to match, auto-expand
   // - Otherwise, only expanded if explicitly in expandedPaths
   const isExpanded = expandedPaths.has('__EXPAND_ALL__')
     ? true // Expand all mode
-    : matchingPaths.size > 0 && isOnPathToMatch
-      ? true // Auto-expand when filtering to show matches
-      : expandedPaths.has(currentPath) // Progressive disclosure
+    : expandedPaths.has('__EXPAND_TO_DEPTH_2__') && pathDepth <= 2
+      ? true // Depth-limited expansion for large files
+      : matchingPaths.size > 0 && isOnPathToMatch
+        ? true // Auto-expand when filtering to show matches
+        : expandedPaths.has(currentPath) // Progressive disclosure
+
+  // Lazy loading state for large arrays/objects
+  const childEntries = useMemo(() => getChildEntries(), [value, isArray])
+  const totalChildren = childEntries.length
+  const requiresPagination = totalChildren > LAZY_LOAD_THRESHOLD
+
+  const [displayedCount, setDisplayedCount] = useState(() =>
+    requiresPagination ? LAZY_LOAD_BATCH_SIZE : totalChildren
+  )
+
+  // Reset displayed count when node is collapsed/expanded or when filtering changes
+  useMemo(() => {
+    if (!isExpanded) {
+      setDisplayedCount(requiresPagination ? LAZY_LOAD_BATCH_SIZE : totalChildren)
+    }
+  }, [isExpanded, requiresPagination, totalChildren])
+
+  const hasMore = displayedCount < totalChildren
+  const remainingCount = totalChildren - displayedCount
+
+  const handleLoadMore = () => {
+    setDisplayedCount(prev => Math.min(prev + LAZY_LOAD_BATCH_SIZE, totalChildren))
+  }
+
+  const handleLoadAll = () => {
+    setDisplayedCount(totalChildren)
+  }
 
   const handleCopyPath = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -95,10 +129,26 @@ export function JsonTreeNode({
     setTimeout(() => setCopyNotification(false), 2000)
   }
 
+  const handleExpandSubtree = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (isExpandable && jsonData) {
+      expandSubtree(currentPath, jsonData)
+      setCopyNotification(true, `Expanded all children of ${nodeKey}`)
+      setTimeout(() => setCopyNotification(false), 2000)
+    }
+  }
+
   const handleToggle = () => {
     if (isExpandable) {
       togglePath(currentPath)
     }
+  }
+
+  const getChildEntries = (): [string, JsonValue][] => {
+    if (isArray) {
+      return (value as JsonValue[]).map((item, index) => [String(index), item])
+    }
+    return Object.entries(value as Record<string, JsonValue>)
   }
 
   const renderValue = () => {
@@ -114,13 +164,6 @@ export function JsonTreeNode({
       default:
         return null
     }
-  }
-
-  const getChildEntries = (): [string, JsonValue][] => {
-    if (isArray) {
-      return (value as JsonValue[]).map((item, index) => [String(index), item])
-    }
-    return Object.entries(value as Record<string, JsonValue>)
   }
 
   const getPreview = () => {
@@ -184,22 +227,61 @@ export function JsonTreeNode({
           <Bookmark className="w-3 h-3" />
           <span>bookmark</span>
         </button>
+
+        {isExpandable && (
+          <button
+            onClick={handleExpandSubtree}
+            className="ml-1 opacity-0 group-hover:opacity-100 flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded border border-border text-xs text-muted-foreground hover:text-primary hover:border-primary transition-all"
+            title="Expand all children"
+          >
+            <ChevronsDown className="w-3 h-3" />
+            <span>expand all</span>
+          </button>
+        )}
       </div>
 
       {isExpandable && isExpanded && (
         <div className="ml-6 border-l border-border pl-2">
-          {getChildEntries().map(([key, childValue], index, arr) => (
+          {childEntries.slice(0, displayedCount).map(([key, childValue], index) => (
             <JsonTreeNode
               key={key}
               nodeKey={key}
               value={childValue}
               pathSegments={currentSegments}
-              isLast={index === arr.length - 1}
+              isLast={index === displayedCount - 1 && !hasMore}
               matchingPaths={matchingPaths}
               emptyPaths={emptyPaths}
               hideEmpty={hideEmpty}
             />
           ))}
+
+          {/* Load more buttons for pagination */}
+          {hasMore && (
+            <div className="flex gap-2 py-2 px-2 my-1">
+              <button
+                onClick={handleLoadMore}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors border border-border"
+                title={`Load ${Math.min(LAZY_LOAD_BATCH_SIZE, remainingCount)} more items`}
+              >
+                <Plus className="w-3 h-3" />
+                <span>
+                  Load {Math.min(LAZY_LOAD_BATCH_SIZE, remainingCount)} more
+                </span>
+                <span className="text-muted-foreground">
+                  ({remainingCount} remaining)
+                </span>
+              </button>
+
+              <button
+                onClick={handleLoadAll}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-primary/10 hover:bg-primary/20 text-primary hover:text-primary transition-colors border border-primary/20"
+                title="Load all remaining items"
+              >
+                <ChevronsDown className="w-3 h-3" />
+                <span>Load all</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

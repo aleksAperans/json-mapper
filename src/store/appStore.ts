@@ -17,8 +17,18 @@ interface AppState {
   // Loading and error states
   isLoading: boolean
   setIsLoading: (loading: boolean) => void
+  loadingProgress: number
+  loadingMessage: string
+  setLoadingProgress: (progress: number, message: string) => void
   error: string | null
   setError: (error: string | null) => void
+
+  // JSON metadata (computed during parsing)
+  metadata: {
+    nodeCount: number
+    maxDepth: number
+  } | null
+  setMetadata: (metadata: { nodeCount: number; maxDepth: number } | null) => void
 
   // Current path
   currentPath: string | null
@@ -50,6 +60,7 @@ interface AppState {
   togglePath: (path: string) => void
   expandAll: () => void
   collapseAll: () => void
+  expandSubtree: (parentPath: string, data: JsonValue) => void
 
   // Clear data
   clearJsonData: () => void
@@ -83,8 +94,15 @@ export const useAppStore = create<AppState>((set) => ({
   // Loading and error states
   isLoading: false,
   setIsLoading: (loading) => set({ isLoading: loading }),
+  loadingProgress: 0,
+  loadingMessage: '',
+  setLoadingProgress: (progress, message) => set({ loadingProgress: progress, loadingMessage: message }),
   error: null,
   setError: (error) => set({ error }),
+
+  // JSON metadata
+  metadata: null,
+  setMetadata: (metadata) => set({ metadata }),
 
   // Current path
   currentPath: null,
@@ -116,10 +134,11 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => {
       const newSet = new Set(state.expandedPaths)
 
-      // If we're in "expand all" mode, remove it and start tracking individual paths
-      if (newSet.has('__EXPAND_ALL__')) {
+      // If we're in "expand all" or "expand to depth" mode, remove it and start tracking individual paths
+      if (newSet.has('__EXPAND_ALL__') || newSet.has('__EXPAND_TO_DEPTH_2__')) {
         newSet.delete('__EXPAND_ALL__')
-        // Add this path since we're collapsing it (opposite of expand all)
+        newSet.delete('__EXPAND_TO_DEPTH_2__')
+        // Add this path since we're collapsing it (opposite of expand mode)
         return { expandedPaths: newSet }
       }
 
@@ -132,17 +151,71 @@ export const useAppStore = create<AppState>((set) => ({
       }
       return { expandedPaths: newSet }
     }),
-  expandAll: () => set({ expandedPaths: new Set<string>(['__EXPAND_ALL__']) }),
+  expandAll: () => set((state) => {
+    // For large files, use depth-limited expansion instead of full expansion
+    const isLargeFile = state.metadata?.nodeCount && state.metadata.nodeCount > 5000
+    if (isLargeFile) {
+      return { expandedPaths: new Set<string>(['__EXPAND_TO_DEPTH_2__']) }
+    }
+    return { expandedPaths: new Set<string>(['__EXPAND_ALL__']) }
+  }),
   collapseAll: () => set({ expandedPaths: new Set<string>() }),
+  expandSubtree: (parentPath: string, data: JsonValue) => set((state) => {
+    // Recursively expand all children under a specific parent path
+    const newPaths = new Set(state.expandedPaths)
+    // Remove expand all flags if present
+    newPaths.delete('__EXPAND_ALL__')
+    newPaths.delete('__EXPAND_TO_DEPTH_4__')
+
+    // Add the parent path itself
+    newPaths.add(parentPath)
+
+    // Recursively collect all descendant paths
+    const collectPaths = (value: any, currentPath: string) => {
+      if (value === null || typeof value !== 'object') return
+
+      if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          const childPath = `${currentPath}[${index}]`
+          newPaths.add(childPath)
+          collectPaths(item, childPath)
+        })
+      } else {
+        Object.keys(value).forEach((key) => {
+          const childPath = currentPath ? `${currentPath}.${key}` : key
+          newPaths.add(childPath)
+          collectPaths(value[key], childPath)
+        })
+      }
+    }
+
+    // Find the value at the parent path and expand all its children
+    const pathSegments = parentPath.split(/[.\[\]]/).filter(Boolean)
+    let currentValue = data
+
+    for (const segment of pathSegments) {
+      if (currentValue === null || typeof currentValue !== 'object') break
+      currentValue = Array.isArray(currentValue) ? currentValue[parseInt(segment)] : currentValue[segment]
+    }
+
+    if (currentValue !== null && typeof currentValue === 'object') {
+      collectPaths(currentValue, parentPath)
+    }
+
+    return { expandedPaths: newPaths }
+  }),
 
   // Clear data
   clearJsonData: () => set({
     jsonData: null,
     fileSize: null,
+    metadata: null,
     currentPath: null,
     filterQuery: '',
     expandedPaths: new Set<string>(),
-    error: null
+    error: null,
+    loadingProgress: 0,
+    loadingMessage: ''
   }),
 
   // Import history

@@ -12,11 +12,23 @@ import { CopyNotification } from './components/CopyNotification'
 import { QueryExtractView } from './components/QueryExtractView'
 import { BookmarksModal } from './components/BookmarksModal'
 import { AlertCircle } from 'lucide-react'
-import { calculateJsonSize } from './utils/fileSize'
+import { parseJSONAsync } from './utils/workerParser'
 
 function App() {
   const { theme } = useThemeStore()
-  const { jsonData, setJsonData, setFileSize, addToHistory, isLoading, setIsLoading, error, setError, activeFeature } = useAppStore()
+  const {
+    jsonData,
+    setJsonData,
+    setFileSize,
+    setMetadata,
+    addToHistory,
+    isLoading,
+    setIsLoading,
+    setLoadingProgress,
+    error,
+    setError,
+    activeFeature
+  } = useAppStore()
 
   // Apply theme to document
   useEffect(() => {
@@ -32,11 +44,17 @@ function App() {
     async (file: File) => {
       setIsLoading(true)
       setError(null)
+      setLoadingProgress(0, '')
       try {
         const text = await file.text()
-        const data = JSON.parse(text)
-        setJsonData(data)
-        setFileSize(calculateJsonSize(data))
+        const result = await parseJSONAsync(text, {
+          onProgress: (progress, message) => {
+            setLoadingProgress(progress, message)
+          }
+        })
+        setJsonData(result.data)
+        setFileSize(result.size)
+        setMetadata(result.metadata)
         addToHistory({ source: 'file', name: file.name })
       } catch (error) {
         console.error('Failed to parse JSON:', error)
@@ -44,20 +62,27 @@ function App() {
         setError(errorMsg)
       } finally {
         setIsLoading(false)
+        setLoadingProgress(0, '')
       }
     },
-    [setJsonData, setFileSize, addToHistory, setIsLoading, setError]
+    [setJsonData, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError]
   )
 
   // Handle paste from clipboard
   const handlePasteFromClipboard = useCallback(async () => {
     setIsLoading(true)
     setError(null)
+    setLoadingProgress(0, '')
     try {
       const text = await navigator.clipboard.readText()
-      const data = JSON.parse(text)
-      setJsonData(data)
-      setFileSize(calculateJsonSize(data))
+      const result = await parseJSONAsync(text, {
+        onProgress: (progress, message) => {
+          setLoadingProgress(progress, message)
+        }
+      })
+      setJsonData(result.data)
+      setFileSize(result.size)
+      setMetadata(result.metadata)
       addToHistory({ source: 'clipboard' })
     } catch (error) {
       console.error('Failed to parse JSON from clipboard:', error)
@@ -65,22 +90,30 @@ function App() {
       setError(errorMsg)
     } finally {
       setIsLoading(false)
+      setLoadingProgress(0, '')
     }
-  }, [setJsonData, setFileSize, addToHistory, setIsLoading, setError])
+  }, [setJsonData, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError])
 
   // Handle fetch from URL
   const handleFetchFromUrl = useCallback(
     async (url: string) => {
       setIsLoading(true)
       setError(null)
+      setLoadingProgress(0, 'Fetching JSON from URL...')
       try {
         const response = await fetch(url)
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
-        const data = await response.json()
-        setJsonData(data)
-        setFileSize(calculateJsonSize(data))
+        const text = await response.text()
+        const result = await parseJSONAsync(text, {
+          onProgress: (progress, message) => {
+            setLoadingProgress(progress, message)
+          }
+        })
+        setJsonData(result.data)
+        setFileSize(result.size)
+        setMetadata(result.metadata)
         addToHistory({ source: 'url', url })
       } catch (error) {
         console.error('Failed to fetch JSON from URL:', error)
@@ -88,9 +121,10 @@ function App() {
         setError(errorMsg)
       } finally {
         setIsLoading(false)
+        setLoadingProgress(0, '')
       }
     },
-    [setJsonData, setFileSize, addToHistory, setIsLoading, setError]
+    [setJsonData, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError]
   )
 
   return (

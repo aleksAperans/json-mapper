@@ -1,16 +1,21 @@
 import type { JsonValue } from '@/types'
 import { JsonTreeNode } from './JsonTreeNode'
+import { VirtualJsonTree } from './VirtualJsonTree'
 import { getJsonType } from '@/utils/pathGenerator'
 import { useAppStore } from '@/store/appStore'
 import { getMatchingPaths, getEmptyPaths } from '@/utils/filter'
+import { getTotalNodeCount } from '@/utils/treeFlattener'
 import { useMemo } from 'react'
+
+// Threshold for switching to virtual scrolling
+const VIRTUAL_SCROLL_THRESHOLD = 500
 
 interface JsonTreeProps {
   data: JsonValue
 }
 
 export function JsonTree({ data }: JsonTreeProps) {
-  const { filterQuery, caseSensitive, pathFormat, hideEmpty } = useAppStore()
+  const { filterQuery, caseSensitive, pathFormat, hideEmpty, metadata } = useAppStore()
 
   // Calculate matching paths when filter is active
   const matchingPaths = useMemo(() => {
@@ -23,6 +28,18 @@ export function JsonTree({ data }: JsonTreeProps) {
     if (!hideEmpty) return new Set<string>()
     return getEmptyPaths(data, pathFormat)
   }, [data, pathFormat, hideEmpty])
+
+  // Determine if we should use virtual scrolling
+  const totalNodes = useMemo(() => {
+    // Use metadata if available (from worker parsing)
+    if (metadata?.nodeCount) {
+      return metadata.nodeCount
+    }
+    // Otherwise calculate on-demand
+    return getTotalNodeCount(data)
+  }, [data, metadata])
+
+  const useVirtualScrolling = totalNodes > VIRTUAL_SCROLL_THRESHOLD
 
   const valueType = getJsonType(data)
   const isObject = valueType === 'object'
@@ -49,7 +66,12 @@ export function JsonTree({ data }: JsonTreeProps) {
     )
   }
 
-  // For objects and arrays
+  // Use virtual scrolling for large datasets
+  if (useVirtualScrolling) {
+    return <VirtualJsonTree data={data} />
+  }
+
+  // For objects and arrays - use regular tree rendering
   const entries = isArray
     ? (data as JsonValue[]).map((item, index) => [String(index), item] as [string, JsonValue])
     : Object.entries(data as Record<string, JsonValue>)
