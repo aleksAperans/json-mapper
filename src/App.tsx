@@ -11,6 +11,7 @@ import { FeatureToolbar } from './components/FeatureToolbar'
 import { CopyNotification } from './components/CopyNotification'
 import { QueryExtractView } from './components/QueryExtractView'
 import { BookmarksModal } from './components/BookmarksModal'
+import { AlertCircle } from 'lucide-react'
 
 function App() {
   const { theme } = useThemeStore()
@@ -99,33 +100,29 @@ function App() {
             {isLoading ? (
               <LoadingSpinner />
             ) : error ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="max-w-md px-4 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-                    <svg
-                      className="w-8 h-8 text-red-600 dark:text-red-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
+              <div className="flex items-center justify-center h-full p-8">
+                <div className="max-w-md w-full">
+                  <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-8">
+                    <div className="flex flex-col items-center text-center space-y-4">
+                      <div className="rounded-full bg-destructive/10 p-3">
+                        <AlertCircle className="h-8 w-8 text-destructive" />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-semibold tracking-tight">
+                          Error Loading JSON
+                        </h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {error}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setError(null)}
+                        className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90"
+                      >
+                        Try Again
+                      </button>
+                    </div>
                   </div>
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                    Error Loading JSON
-                  </h2>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
-                  <button
-                    onClick={() => setError(null)}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Try Again
-                  </button>
                 </div>
               </div>
             ) : !jsonData ? (

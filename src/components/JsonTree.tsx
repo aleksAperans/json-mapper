@@ -50,9 +50,6 @@ export function JsonTree({ data }: JsonTreeProps) {
 
   return (
     <div className="p-6">
-      <div className="font-mono text-sm text-gray-500 mb-2">
-        {isArray ? '[' : '{'}
-      </div>
       <div className="ml-2">
         {entries.map(([key, value], index) => (
           <JsonTreeNode
@@ -64,9 +61,6 @@ export function JsonTree({ data }: JsonTreeProps) {
             matchingPaths={matchingPaths}
           />
         ))}
-      </div>
-      <div className="font-mono text-sm text-gray-500 mt-2">
-        {isArray ? ']' : '}'}
       </div>
     </div>
   )

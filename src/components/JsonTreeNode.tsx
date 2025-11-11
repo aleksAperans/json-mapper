@@ -155,9 +155,7 @@ export function JsonTreeNode({ nodeKey, value, pathSegments, isLast = false, mat
           >
             {getPreview()}
           </span>
-        ) : (
-          <span className="text-gray-500">{isArray ? '[' : '{'}</span>
-        )}
+        ) : null}
 
         <button
           onClick={handleCopyPath}
@@ -190,13 +188,6 @@ export function JsonTreeNode({ nodeKey, value, pathSegments, isLast = false, mat
               matchingPaths={matchingPaths}
             />
           ))}
-        </div>
-      )}
-
-      {isExpandable && isExpanded && (
-        <div className="ml-6 pl-2 text-gray-500">
-          {isArray ? ']' : '}'}
-          {!isLast && ','}
         </div>
       )}
     </div>
