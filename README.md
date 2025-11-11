@@ -4,6 +4,8 @@ A powerful JSON viewer and explorer for navigating, searching, and mapping neste
 
 🌐 **[jsonmapper.dev](https://jsonmapper.dev)**
 
+![JSON Mapper Screenshot](public/json-mapper.png)
+
 ## Features
 
 - 🌳 **Multiple Views** - Tree and JSON text views

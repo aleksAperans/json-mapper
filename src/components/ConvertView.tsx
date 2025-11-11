@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useAppStore } from '@/store/appStore'
-import { Copy, Download, FileCode, FileText, Table, Clipboard, FileUp, FileJson } from 'lucide-react'
+import { Copy, Download, FileCode, FileText, Table, Clipboard, FileUp, FileJson, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { copyToClipboard } from '@/utils/clipboard'
 import yaml from 'js-yaml'
@@ -81,7 +81,7 @@ interface ConvertViewProps {
 }
 
 export function ConvertView({ onPasteFromClipboard, onFileUpload, onLoadExample }: ConvertViewProps = {}) {
-  const { jsonData, setCopyNotification } = useAppStore()
+  const { jsonData, setCopyNotification, clearJsonData } = useAppStore()
   const [selectedFormat, setSelectedFormat] = useState<ConvertFormat>('yaml')
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -219,6 +219,19 @@ export function ConvertView({ onPasteFromClipboard, onFileUpload, onLoadExample 
               <span className="hidden lg:inline">Download</span>
             </button>
           </div>
+
+          <div className="flex-1" />
+
+          {/* Clear Button */}
+          <button
+            onClick={clearJsonData}
+            disabled={!jsonData}
+            className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium text-destructive shadow-sm transition-colors hover:bg-destructive/10 disabled:pointer-events-none disabled:opacity-50"
+            title="Clear JSON data"
+          >
+            <Trash2 className="h-4 w-4 flex-shrink-0" />
+            <span className="hidden lg:inline">Clear</span>
+          </button>
         </div>
       </div>
 
