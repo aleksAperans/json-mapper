@@ -9,6 +9,8 @@ import { findSearchMatches } from '@/utils/searchMatches'
 export function ActionsToolbar() {
   const {
     activeFeature,
+    viewerMode,
+    setViewerMode,
     expandAll,
     collapseAll,
     clearJsonData,
@@ -216,10 +218,31 @@ export function ActionsToolbar() {
     <>
       {/* Main Toolbar */}
       <div className="flex items-center gap-2 border-b bg-muted/40 px-4 py-2.5">
-        {activeFeature === 'tree' ? (
+        {activeFeature === 'viewer' ? (
           <>
-            {/* Tree View Actions */}
-            <button
+            {/* Viewer Mode Selector */}
+            <span className="text-sm font-medium text-muted-foreground">Mode:</span>
+            <div className="inline-flex items-center rounded-lg border bg-background p-0.5 shadow-sm">
+              {(['text', 'tree', 'table'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setViewerMode(mode)}
+                  className={cn(
+                    'rounded-md px-3 py-1 text-sm font-medium capitalize transition-all',
+                    viewerMode === mode
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+
+            {/* Tree and Text View Actions (show for tree and text modes) */}
+            {(viewerMode === 'tree' || viewerMode === 'text') && (
+              <>
+                <button
               onClick={expandAll}
               className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               title={
@@ -285,6 +308,8 @@ export function ActionsToolbar() {
                 </span>
               )}
             </button>
+              </>
+            )}
           </>
         ) : (
           <>
@@ -450,14 +475,14 @@ export function ActionsToolbar() {
         <div className="border-b bg-muted/20 px-4 py-3">
           <div className="flex items-center gap-2">
             <label className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-              {activeFeature === 'tree' ? 'Filter keys and values:' : 'Filter results:'}
+              {activeFeature === 'viewer' ? 'Filter keys and values:' : 'Filter results:'}
             </label>
             <div className="relative flex-1 max-w-lg">
               <input
                 type="text"
                 value={filterInputValue}
                 onChange={(e) => setFilterInputValue(e.target.value)}
-                placeholder={activeFeature === 'tree' ? 'Enter filter text...' : 'Enter filter text...'}
+                placeholder={activeFeature === 'viewer' ? 'Enter filter text...' : 'Enter filter text...'}
                 className="h-9 w-full rounded-md border border-input bg-background px-3 pr-8 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 autoFocus={!isSearchOpen}
               />

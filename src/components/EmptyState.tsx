@@ -1,4 +1,4 @@
-import { Clipboard, FileUp } from 'lucide-react'
+import { Clipboard, FileUp, FileJson } from 'lucide-react'
 import { useEffect } from 'react'
 import {
   Empty,
@@ -8,9 +8,10 @@ import {
 interface EmptyStateProps {
   onPasteFromClipboard: () => void
   onFileUpload: (file: File) => void
+  onLoadExample: () => void
 }
 
-export function EmptyState({ onPasteFromClipboard, onFileUpload }: EmptyStateProps) {
+export function EmptyState({ onPasteFromClipboard, onFileUpload, onLoadExample }: EmptyStateProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Cmd+V / Ctrl+V for paste
@@ -76,6 +77,18 @@ export function EmptyState({ onPasteFromClipboard, onFileUpload }: EmptyStatePro
             </kbd>
           </div>
         </label>
+
+        <button
+          onClick={onLoadExample}
+          className="group flex items-center justify-between rounded-lg border bg-card px-5 py-3 text-left shadow-sm transition-all hover:bg-accent hover:shadow-md"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <FileJson className="h-5 w-5" />
+            </div>
+            <span className="text-sm font-medium">Load Example</span>
+          </div>
+        </button>
       </EmptyContent>
     </Empty>
   )

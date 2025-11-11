@@ -1,4 +1,4 @@
-import { Network, Search, Copy } from 'lucide-react'
+import { Eye, Search, Copy } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { copyToClipboard } from '@/utils/clipboard'
 import { cn } from '@/lib/utils'
@@ -13,15 +13,21 @@ import {
 
 const features = [
   {
-    id: 'tree' as const,
-    label: 'Tree View',
-    icon: Network,
+    id: 'viewer' as const,
+    label: 'Viewer',
+    icon: Eye,
   },
   {
     id: 'query' as const,
     label: 'Query & Extract',
     icon: Search,
   },
+]
+
+const viewerModes = [
+  { value: 'text', label: 'Text' },
+  { value: 'tree', label: 'Tree' },
+  { value: 'table', label: 'Table' },
 ]
 
 const formats: { value: PathFormat; label: string }[] = [

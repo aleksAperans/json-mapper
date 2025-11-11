@@ -11,6 +11,8 @@ interface AppState {
   // JSON data
   jsonData: JsonValue | null
   setJsonData: (data: JsonValue | null) => void
+  originalText: string | null
+  setOriginalText: (text: string | null) => void
   fileSize: number | null
   setFileSize: (size: number | null) => void
 
@@ -34,13 +36,21 @@ interface AppState {
   currentPath: string | null
   setCurrentPath: (path: string | null) => void
 
+  // Hover position (for displaying line/column in footer)
+  hoverPosition: { line: number; column: number } | null
+  setHoverPosition: (position: { line: number; column: number } | null) => void
+
   // Path format
   pathFormat: PathFormat
   setPathFormat: (format: PathFormat) => void
 
   // Active feature
-  activeFeature: 'tree' | 'query'
-  setActiveFeature: (feature: 'tree' | 'query') => void
+  activeFeature: 'viewer' | 'query'
+  setActiveFeature: (feature: 'viewer' | 'query') => void
+
+  // Viewer mode (for the viewer feature)
+  viewerMode: 'text' | 'tree' | 'table'
+  setViewerMode: (mode: 'text' | 'tree' | 'table') => void
 
   // Query & Extract feature
   extractionMode: 'paths' | 'keys' | 'values'
@@ -104,6 +114,8 @@ export const useAppStore = create<AppState>((set) => ({
   // JSON data
   jsonData: null,
   setJsonData: (data) => set({ jsonData: data }),
+  originalText: null,
+  setOriginalText: (text) => set({ originalText: text }),
   fileSize: null,
   setFileSize: (size) => set({ fileSize: size }),
 
@@ -124,13 +136,21 @@ export const useAppStore = create<AppState>((set) => ({
   currentPath: null,
   setCurrentPath: (path) => set({ currentPath: path }),
 
+  // Hover position
+  hoverPosition: null,
+  setHoverPosition: (position) => set({ hoverPosition: position }),
+
   // Path format
   pathFormat: 'jmespath',
   setPathFormat: (format) => set({ pathFormat: format }),
 
   // Active feature
-  activeFeature: 'tree',
+  activeFeature: 'viewer',
   setActiveFeature: (feature) => set({ activeFeature: feature }),
+
+  // Viewer mode
+  viewerMode: 'tree',
+  setViewerMode: (mode) => set({ viewerMode: mode }),
 
   // Query & Extract feature
   extractionMode: 'paths',
@@ -240,9 +260,11 @@ export const useAppStore = create<AppState>((set) => ({
   // Clear data
   clearJsonData: () => set({
     jsonData: null,
+    originalText: null,
     fileSize: null,
     metadata: null,
     currentPath: null,
+    hoverPosition: null,
     filterQuery: '',
     searchQuery: '',
     expandedPaths: new Set<string>(),

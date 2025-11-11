@@ -3,7 +3,7 @@ import { useAppStore } from '@/store/appStore'
 import { formatFileSize } from '@/utils/fileSize'
 
 export function Footer() {
-  const { fileSize, metadata } = useAppStore()
+  const { fileSize, metadata, hoverPosition } = useAppStore()
 
   return (
     <footer className="border-t bg-muted/40 px-4 py-2">
@@ -30,9 +30,18 @@ export function Footer() {
           )}
         </div>
 
-        {/* Right side: Additional info or actions can go here */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>JSON Mapper</span>
+        {/* Right side: Position info and app name */}
+        <div className="flex items-center gap-4">
+          {hoverPosition && (
+            <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+              <span className="font-mono">
+                Line: {hoverPosition.line}  Column: {hoverPosition.column}
+              </span>
+            </div>
+          )}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>JSON Mapper</span>
+          </div>
         </div>
       </div>
     </footer>

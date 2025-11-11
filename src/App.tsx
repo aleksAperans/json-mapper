@@ -6,6 +6,8 @@ import { Header } from './components/Header'
 import { EmptyState } from './components/EmptyState'
 import { LoadingSpinner } from './components/LoadingSpinner'
 import { JsonTree } from './components/JsonTree'
+import { TextView } from './components/TextView'
+import { TableView } from './components/TableView'
 import { ActionsToolbar } from './components/ActionsToolbar'
 import { FeatureToolbar } from './components/FeatureToolbar'
 import { Footer } from './components/Footer'
@@ -15,11 +17,88 @@ import { BookmarksModal } from './components/BookmarksModal'
 import { AlertCircle } from 'lucide-react'
 import { parseJSONAsync } from './utils/workerParser'
 
+const EXAMPLE_JSON = {
+  "band": {
+    "name": "Daft Punk",
+    "formed": 1993,
+    "disbanded": 2021,
+    "genre": ["Electronic", "House", "Disco", "Funk"],
+    "members": [
+      {
+        "name": "Thomas Bangalter",
+        "role": ["Producer", "DJ", "Multi-instrumentalist"],
+        "birthYear": 1975,
+        "equipment": {
+          "synthesizers": ["Roland Juno-106", "Minimoog Voyager"],
+          "samplers": ["E-mu SP-1200", "Akai MPC3000"],
+          "customGear": {
+            "helmet": {
+              "version": 2,
+              "features": ["LED Display", "Cooling System", "Gold Plating"],
+              "designer": "Tony Gardner"
+            }
+          }
+        },
+        "sideProjects": ["Stardust", "Together", "Roule Records"]
+      },
+      {
+        "name": "Guy-Manuel de Homem-Christo",
+        "role": ["Producer", "DJ", "Guitarist"],
+        "birthYear": 1974,
+        "equipment": {
+          "synthesizers": ["Roland Jupiter-8", "ARP 2600"],
+          "guitars": ["Fender Stratocaster", "Gibson Les Paul"],
+          "customGear": {
+            "helmet": {
+              "version": 2,
+              "features": ["Rainbow LED", "Ventilation", "Chrome Finish"],
+              "designer": "Tony Gardner"
+            }
+          }
+        },
+        "sideProjects": ["Le Knight Club", "Crydamoure Records"]
+      }
+    ],
+    "discography": {
+      "studioAlbums": [
+        {
+          "title": "Homework",
+          "year": 1997,
+          "topTracks": [
+            {
+              "name": "Around the World",
+              "length": "7:09",
+              "certifications": ["Gold", "Platinum"]
+            },
+            {
+              "name": "Da Funk",
+              "length": "5:28",
+              "certifications": ["Silver"]
+            }
+          ]
+        },
+        {
+          "title": "Random Access Memories",
+          "year": 2013,
+          "topTracks": [
+            {
+              "name": "Get Lucky",
+              "length": "6:09",
+              "certifications": ["Multi-Platinum", "Diamond"]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+
 function App() {
   const { theme } = useThemeStore()
   const {
     jsonData,
     setJsonData,
+    setOriginalText,
     setFileSize,
     setMetadata,
     addToHistory,
@@ -28,7 +107,8 @@ function App() {
     setLoadingProgress,
     error,
     setError,
-    activeFeature
+    activeFeature,
+    viewerMode
   } = useAppStore()
 
   // Apply theme to document
@@ -54,6 +134,7 @@ function App() {
           }
         })
         setJsonData(result.data)
+        setOriginalText(text)
         setFileSize(result.size)
         setMetadata(result.metadata)
         addToHistory({ source: 'file', name: file.name })
@@ -66,7 +147,7 @@ function App() {
         setLoadingProgress(0, '')
       }
     },
-    [setJsonData, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError]
+    [setJsonData, setOriginalText, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError]
   )
 
   // Handle paste from clipboard
@@ -82,6 +163,7 @@ function App() {
         }
       })
       setJsonData(result.data)
+      setOriginalText(text)
       setFileSize(result.size)
       setMetadata(result.metadata)
       addToHistory({ source: 'clipboard' })
@@ -93,7 +175,7 @@ function App() {
       setIsLoading(false)
       setLoadingProgress(0, '')
     }
-  }, [setJsonData, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError])
+  }, [setJsonData, setOriginalText, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError])
 
   // Handle fetch from URL
   const handleFetchFromUrl = useCallback(
@@ -113,6 +195,7 @@ function App() {
           }
         })
         setJsonData(result.data)
+        setOriginalText(text)
         setFileSize(result.size)
         setMetadata(result.metadata)
         addToHistory({ source: 'url', url })
@@ -125,8 +208,35 @@ function App() {
         setLoadingProgress(0, '')
       }
     },
-    [setJsonData, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError]
+    [setJsonData, setOriginalText, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError]
   )
+
+  // Handle load example
+  const handleLoadExample = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    setLoadingProgress(0, '')
+    try {
+      const text = JSON.stringify(EXAMPLE_JSON, null, 2)
+      const result = await parseJSONAsync(text, {
+        onProgress: (progress, message) => {
+          setLoadingProgress(progress, message)
+        }
+      })
+      setJsonData(result.data)
+      setOriginalText(text)
+      setFileSize(result.size)
+      setMetadata(result.metadata)
+      addToHistory({ source: 'file', name: 'example.json' })
+    } catch (error) {
+      console.error('Failed to load example JSON:', error)
+      const errorMsg = error instanceof Error ? error.message : 'Failed to load example'
+      setError(errorMsg)
+    } finally {
+      setIsLoading(false)
+      setLoadingProgress(0, '')
+    }
+  }, [setJsonData, setOriginalText, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError])
 
   return (
     <ErrorBoundary>
@@ -172,9 +282,16 @@ function App() {
             <EmptyState
               onPasteFromClipboard={handlePasteFromClipboard}
               onFileUpload={handleFileUpload}
+              onLoadExample={handleLoadExample}
             />
-          ) : activeFeature === 'tree' ? (
-            <JsonTree data={jsonData} />
+          ) : activeFeature === 'viewer' ? (
+            viewerMode === 'tree' ? (
+              <JsonTree data={jsonData} />
+            ) : viewerMode === 'text' ? (
+              <TextView />
+            ) : (
+              <TableView />
+            )
           ) : (
             <QueryExtractView />
           )}

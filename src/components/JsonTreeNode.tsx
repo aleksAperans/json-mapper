@@ -5,6 +5,7 @@ import { useAppStore } from '@/store/appStore'
 import { generatePath } from '@/utils/pathGenerator'
 import { copyToClipboard } from '@/utils/clipboard'
 import { shouldShowNode } from '@/utils/filter'
+import { findPositionInText } from '@/utils/positionCalculator'
 import { useMemo, useState, useEffect } from 'react'
 
 // Lazy loading configuration
@@ -47,7 +48,9 @@ export function JsonTreeNode({
     truncateValues,
     searchQuery,
     searchCaseSensitive,
-    currentSearchIndex
+    currentSearchIndex,
+    originalText,
+    setHoverPosition
   } = useAppStore()
 
   const valueType = getJsonType(value)
@@ -96,6 +99,14 @@ export function JsonTreeNode({
       : matchingPaths.size > 0 && isOnPathToMatch
         ? true // Auto-expand when filtering to show matches
         : expandedPaths.has(currentPath) // Progressive disclosure
+
+  // Helper function to get child entries
+  const getChildEntries = (): [string, JsonValue][] => {
+    if (isArray) {
+      return (value as JsonValue[]).map((item, index) => [String(index), item])
+    }
+    return Object.entries(value as Record<string, JsonValue>)
+  }
 
   // Lazy loading state for large arrays/objects
   const childEntries = useMemo(() => getChildEntries(), [value, isArray])
@@ -158,11 +169,17 @@ export function JsonTreeNode({
     }
   }
 
-  const getChildEntries = (): [string, JsonValue][] => {
-    if (isArray) {
-      return (value as JsonValue[]).map((item, index) => [String(index), item])
+  const handleMouseEnter = () => {
+    if (originalText) {
+      const position = findPositionInText(originalText, currentSegments, value)
+      if (position) {
+        setHoverPosition(position)
+      }
     }
-    return Object.entries(value as Record<string, JsonValue>)
+  }
+
+  const handleMouseLeave = () => {
+    setHoverPosition(null)
   }
 
   // Keep track of match indices for this node
@@ -259,7 +276,11 @@ export function JsonTreeNode({
 
   return (
     <div className="font-mono text-base">
-      <div className="flex items-start hover:bg-gray-100 dark:hover:bg-gray-800 py-1 px-2 rounded group">
+      <div
+        className="flex items-start hover:bg-gray-100 dark:hover:bg-gray-800 py-1 px-2 rounded group"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
         {isExpandable && (
           <button
             onClick={handleToggle}
