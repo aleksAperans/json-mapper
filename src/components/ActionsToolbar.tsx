@@ -1,4 +1,4 @@
-import { ChevronsDown, ChevronsUp, X, Trash2, Copy, CaseSensitive, Bookmark, EyeOff, Filter, Search, ChevronLeft, ChevronRight, WrapText, Braces, Network } from 'lucide-react'
+import { ChevronsDown, ChevronsUp, X, Trash2, Copy, CaseSensitive, Bookmark, EyeOff, Filter, Search, ChevronLeft, ChevronRight, WrapText, Braces, Network, Route, Key, FileJson } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { copyToClipboard } from '@/utils/clipboard'
 import { cn } from '@/lib/utils'
@@ -306,26 +306,31 @@ export function ActionsToolbar() {
               </>
             )}
           </>
-        ) : (
+        ) : activeFeature === 'query' ? (
           <>
             {/* Query & Extract Actions */}
             <div className="inline-flex items-center rounded-lg border bg-background p-0.5 shadow-sm">
-              {(['paths', 'keys', 'values'] as const).map((mode) => (
-                <button
-                  key={mode}
-                  onClick={() => setExtractionMode(mode)}
-                  className={cn(
-                    'rounded-md px-3 py-1 text-sm font-medium capitalize transition-all',
-                    extractionMode === mode
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
-                  title={`Extract ${mode}`}
-                >
-                  <span className="hidden lg:inline">{mode}</span>
-                  <span className="lg:hidden">{mode.charAt(0).toUpperCase()}</span>
-                </button>
-              ))}
+              {(['paths', 'keys', 'values'] as const).map((mode) => {
+                const icon = mode === 'paths' ? Route : mode === 'keys' ? Key : FileJson
+                const Icon = icon
+                return (
+                  <button
+                    key={mode}
+                    onClick={() => setExtractionMode(mode)}
+                    className={cn(
+                      'inline-flex items-center gap-2 rounded-md px-3 py-1 text-sm font-medium capitalize transition-all',
+                      extractionMode === mode
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    )}
+                    title={`Extract ${mode}`}
+                  >
+                    <Icon className="h-4 w-4 flex-shrink-0" />
+                    <span className="hidden lg:inline">{mode}</span>
+                    <span className="lg:hidden">{mode.charAt(0).toUpperCase()}</span>
+                  </button>
+                )
+              })}
             </div>
 
             {/* Vertical Separator */}
@@ -341,24 +346,26 @@ export function ActionsToolbar() {
               <span className="hidden lg:inline">Copy All</span>
             </button>
           </>
-        )}
+        ) : null}
 
         <div className="flex-1" />
 
-        {/* Bookmarks Button */}
-        <button
-          onClick={() => setIsBookmarksOpen(true)}
-          className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          title="View bookmarks"
-        >
-          <Bookmark className="h-4 w-4 flex-shrink-0" />
-          <span className="hidden lg:inline">Bookmarks</span>
-          {bookmarks.length > 0 && (
-            <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
-              {bookmarks.length}
-            </span>
-          )}
-        </button>
+        {/* Bookmarks Button - Only show in Viewer mode */}
+        {activeFeature === 'viewer' && (
+          <button
+            onClick={() => setIsBookmarksOpen(true)}
+            className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            title="View bookmarks"
+          >
+            <Bookmark className="h-4 w-4 flex-shrink-0" />
+            <span className="hidden lg:inline">Bookmarks</span>
+            {bookmarks.length > 0 && (
+              <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
+                {bookmarks.length}
+              </span>
+            )}
+          </button>
+        )}
 
         {/* Search Button */}
         <button

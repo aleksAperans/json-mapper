@@ -40,7 +40,7 @@ export function EmptyState({ onPasteFromClipboard, onFileUpload, onLoadExample }
   const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
 
   return (
-    <Empty className="h-full py-20">
+    <Empty className="h-full py-8">
       <EmptyContent className="w-full max-w-sm">
         <button
           onClick={onPasteFromClipboard}

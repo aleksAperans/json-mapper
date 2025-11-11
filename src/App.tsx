@@ -12,6 +12,7 @@ import { FeatureToolbar } from './components/FeatureToolbar'
 import { Footer } from './components/Footer'
 import { CopyNotification } from './components/CopyNotification'
 import { QueryExtractView } from './components/QueryExtractView'
+import { ConvertView } from './components/ConvertView'
 import { BookmarksModal } from './components/BookmarksModal'
 import { AlertCircle } from 'lucide-react'
 import { parseJSONAsync } from './utils/workerParser'
@@ -98,6 +99,7 @@ function App() {
     jsonData,
     setJsonData,
     setOriginalText,
+    activeFeature,
     setFileSize,
     setMetadata,
     addToHistory,
@@ -106,7 +108,6 @@ function App() {
     setLoadingProgress,
     error,
     setError,
-    activeFeature,
     viewerMode
   } = useAppStore()
 
@@ -244,7 +245,7 @@ function App() {
         <div className="sticky top-0 z-10">
           <Header />
           <FeatureToolbar />
-          <ActionsToolbar />
+          {activeFeature !== 'convert' && <ActionsToolbar />}
         </div>
 
         {/* Scrollable Main Content */}
@@ -289,8 +290,10 @@ function App() {
             ) : (
               <TextView />
             )
-          ) : (
+          ) : activeFeature === 'query' ? (
             <QueryExtractView />
+          ) : (
+            <ConvertView />
           )}
         </main>
 

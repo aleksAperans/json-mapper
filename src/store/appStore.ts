@@ -50,8 +50,8 @@ interface AppState {
   setPathFormat: (format: PathFormat) => void
 
   // Active feature
-  activeFeature: 'viewer' | 'query'
-  setActiveFeature: (feature: 'viewer' | 'query') => void
+  activeFeature: 'viewer' | 'query' | 'convert'
+  setActiveFeature: (feature: 'viewer' | 'query' | 'convert') => void
 
   // Viewer mode (for the viewer feature)
   viewerMode: 'json' | 'tree'

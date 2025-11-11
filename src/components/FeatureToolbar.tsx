@@ -1,17 +1,22 @@
-import { Eye, Search } from 'lucide-react'
+import { Eye, Search, RefreshCw } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { cn } from '@/lib/utils'
 
 const features = [
   {
     id: 'viewer' as const,
-    label: 'Viewer',
+    label: 'View',
     icon: Eye,
   },
   {
     id: 'query' as const,
-    label: 'Data Patterns',
+    label: 'Explore',
     icon: Search,
+  },
+  {
+    id: 'convert' as const,
+    label: 'Convert',
+    icon: RefreshCw,
   },
 ]
 
