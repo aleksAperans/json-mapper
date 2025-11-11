@@ -248,7 +248,7 @@ export function VirtualJsonTree({ data }: VirtualJsonTreeProps) {
                 />
               ))}
 
-              <div className="flex items-start hover:bg-gray-100 dark:hover:bg-gray-800 py-1 px-2 rounded group font-mono text-base">
+              <div className="flex items-start hover:bg-gray-100 dark:hover:bg-gray-800 py-1 px-2 rounded group font-mono text-sm">
                 {node.isExpandable ? (
                   <button
                     onClick={() => handleToggle(node)}

@@ -14,6 +14,8 @@ import { CopyNotification } from './components/CopyNotification'
 import { QueryExtractView } from './components/QueryExtractView'
 import { ConvertView } from './components/ConvertView'
 import { BookmarksModal } from './components/BookmarksModal'
+import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal'
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { AlertCircle } from 'lucide-react'
 import { parseJSONAsync } from './utils/workerParser'
 import type { JsonValue } from './types'
@@ -109,8 +111,13 @@ function App() {
     setLoadingProgress,
     error,
     setError,
-    viewerMode
+    viewerMode,
+    isShortcutsOpen,
+    setIsShortcutsOpen
   } = useAppStore()
+
+  // Initialize keyboard shortcuts
+  useKeyboardShortcuts()
 
   // Apply theme to document
   useEffect(() => {
@@ -273,6 +280,10 @@ function App() {
 
         <CopyNotification />
         <BookmarksModal />
+        <KeyboardShortcutsModal
+          isOpen={isShortcutsOpen}
+          onClose={() => setIsShortcutsOpen(false)}
+        />
       </div>
     </ErrorBoundary>
   )

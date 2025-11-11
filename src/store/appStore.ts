@@ -116,6 +116,10 @@ interface AppState {
   clearBookmarks: () => void
   isBookmarksOpen: boolean
   setIsBookmarksOpen: (open: boolean) => void
+
+  // Keyboard Shortcuts
+  isShortcutsOpen: boolean
+  setIsShortcutsOpen: (open: boolean) => void
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -362,4 +366,8 @@ export const useAppStore = create<AppState>((set) => ({
   },
   isBookmarksOpen: false,
   setIsBookmarksOpen: (open) => set({ isBookmarksOpen: open }),
+
+  // Keyboard Shortcuts
+  isShortcutsOpen: false,
+  setIsShortcutsOpen: (open) => set({ isShortcutsOpen: open }),
 }))

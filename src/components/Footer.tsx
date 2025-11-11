@@ -1,4 +1,4 @@
-import { FileJson } from 'lucide-react'
+import { FileJson, Keyboard } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { formatFileSize } from '@/utils/fileSize'
 import type { PathFormat } from '@/types'
@@ -18,7 +18,7 @@ const formats: { value: PathFormat; label: string }[] = [
 ]
 
 export function Footer() {
-  const { fileSize, metadata, hoverPosition, pathFormat, setPathFormat, hoverPath, currentPath } = useAppStore()
+  const { fileSize, metadata, hoverPosition, pathFormat, setPathFormat, hoverPath, currentPath, setIsShortcutsOpen } = useAppStore()
 
   return (
     <footer className="border-t bg-muted/40 px-4 py-2">
@@ -47,6 +47,15 @@ export function Footer() {
 
         {/* Right side: Position info, path format, and path display */}
         <div className="flex items-center gap-3">
+          {/* Keyboard Shortcuts Help Button */}
+          <button
+            onClick={() => setIsShortcutsOpen(true)}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            title="Keyboard shortcuts (⌘/)"
+          >
+            <Keyboard className="h-4 w-4" />
+          </button>
+
           {hoverPosition && (
             <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
               <span className="font-mono">

@@ -355,7 +355,7 @@ export function ActionsToolbar() {
           <button
             onClick={() => setIsBookmarksOpen(true)}
             className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            title="View bookmarks"
+            title="View bookmarks (⌘B)"
           >
             <Bookmark className="h-4 w-4 flex-shrink-0" />
             <span className="hidden lg:inline">Bookmarks</span>
@@ -376,7 +376,7 @@ export function ActionsToolbar() {
               ? 'bg-primary text-primary-foreground border border-primary'
               : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
           )}
-          title="Toggle search"
+          title="Toggle search (⌘F)"
         >
           <Search className="h-4 w-4 flex-shrink-0" />
           <span className="hidden lg:inline">Search</span>
@@ -396,7 +396,7 @@ export function ActionsToolbar() {
               ? 'bg-primary text-primary-foreground border border-primary'
               : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
           )}
-          title="Toggle filter"
+          title="Toggle filter (⌘⇧F)"
         >
           <Filter className="h-4 w-4 flex-shrink-0" />
           <span className="hidden lg:inline">Filter</span>

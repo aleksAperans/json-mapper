@@ -30,3 +30,6 @@ coverage
 .env
 .env.local
 .env.*.local
+
+# Project notes
+requirements.md

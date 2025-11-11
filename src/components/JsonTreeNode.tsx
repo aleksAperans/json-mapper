@@ -290,7 +290,7 @@ export function JsonTreeNode({
   }
 
   return (
-    <div className="font-mono text-base">
+    <div className="font-mono text-sm">
       <div
         className={`flex items-start py-1 px-2 rounded group ${
           isBookmarked
