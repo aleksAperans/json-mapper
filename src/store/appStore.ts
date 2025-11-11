@@ -49,8 +49,8 @@ interface AppState {
   setActiveFeature: (feature: 'viewer' | 'query') => void
 
   // Viewer mode (for the viewer feature)
-  viewerMode: 'text' | 'tree' | 'table'
-  setViewerMode: (mode: 'text' | 'tree' | 'table') => void
+  viewerMode: 'json' | 'tree' | 'table'
+  setViewerMode: (mode: 'json' | 'tree' | 'table') => void
 
   // Query & Extract feature
   extractionMode: 'paths' | 'keys' | 'values'
@@ -83,6 +83,7 @@ interface AppState {
   // Expanded paths (for tree view) - tracks which nodes are expanded
   // By default, nodes are collapsed unless they're in this set or at root level
   expandedPaths: Set<string>
+  collapsedPaths: Set<string> // Tracks explicitly collapsed paths when in Expand All mode
   togglePath: (path: string) => void
   expandAll: () => void
   collapseAll: () => void
@@ -182,36 +183,43 @@ export const useAppStore = create<AppState>((set) => ({
 
   // Expanded paths (start with empty set - nodes collapsed by default)
   expandedPaths: new Set<string>(),
+  collapsedPaths: new Set<string>(),
   togglePath: (path) =>
     set((state) => {
-      const newSet = new Set(state.expandedPaths)
+      const newExpandedSet = new Set(state.expandedPaths)
+      const newCollapsedSet = new Set(state.collapsedPaths)
 
-      // If we're in "expand all" or "expand to depth" mode, remove it and start tracking individual paths
-      if (newSet.has('__EXPAND_ALL__') || newSet.has('__EXPAND_TO_DEPTH_2__')) {
-        newSet.delete('__EXPAND_ALL__')
-        newSet.delete('__EXPAND_TO_DEPTH_2__')
-        // Add this path since we're collapsing it (opposite of expand mode)
-        return { expandedPaths: newSet }
+      // If we're in "expand all" or "expand to depth" mode, use collapsed paths tracking
+      if (newExpandedSet.has('__EXPAND_ALL__') || newExpandedSet.has('__EXPAND_TO_DEPTH_2__')) {
+        // Toggle in the collapsed set instead
+        if (newCollapsedSet.has(path)) {
+          newCollapsedSet.delete(path) // Un-collapse (expand)
+        } else {
+          newCollapsedSet.add(path) // Collapse this specific path
+        }
+        return { expandedPaths: newExpandedSet, collapsedPaths: newCollapsedSet }
       }
 
-      if (newSet.has(path)) {
+      // Normal mode: toggle in expanded set
+      if (newExpandedSet.has(path)) {
         // Path is expanded, collapse it
-        newSet.delete(path)
+        newExpandedSet.delete(path)
       } else {
         // Path is collapsed, expand it
-        newSet.add(path)
+        newExpandedSet.add(path)
       }
-      return { expandedPaths: newSet }
+      // Clear collapsed paths when not in expand all mode
+      return { expandedPaths: newExpandedSet, collapsedPaths: new Set() }
     }),
   expandAll: () => set((state) => {
     // For large files, use depth-limited expansion instead of full expansion
     const isLargeFile = state.metadata?.nodeCount && state.metadata.nodeCount > 5000
     if (isLargeFile) {
-      return { expandedPaths: new Set<string>(['__EXPAND_TO_DEPTH_2__']) }
+      return { expandedPaths: new Set<string>(['__EXPAND_TO_DEPTH_2__']), collapsedPaths: new Set() }
     }
-    return { expandedPaths: new Set<string>(['__EXPAND_ALL__']) }
+    return { expandedPaths: new Set<string>(['__EXPAND_ALL__']), collapsedPaths: new Set() }
   }),
-  collapseAll: () => set({ expandedPaths: new Set<string>() }),
+  collapseAll: () => set({ expandedPaths: new Set<string>(), collapsedPaths: new Set() }),
   expandSubtree: (parentPath: string, data: JsonValue) => set((state) => {
     // Recursively expand all children under a specific parent path
     const newPaths = new Set(state.expandedPaths)
@@ -268,6 +276,7 @@ export const useAppStore = create<AppState>((set) => ({
     filterQuery: '',
     searchQuery: '',
     expandedPaths: new Set<string>(),
+    collapsedPaths: new Set<string>(),
     error: null,
     loadingProgress: 0,
     loadingMessage: ''

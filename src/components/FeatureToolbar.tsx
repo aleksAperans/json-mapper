@@ -24,12 +24,6 @@ const features = [
   },
 ]
 
-const viewerModes = [
-  { value: 'text', label: 'Text' },
-  { value: 'tree', label: 'Tree' },
-  { value: 'table', label: 'Table' },
-]
-
 const formats: { value: PathFormat; label: string }[] = [
   { value: 'jmespath', label: 'JMESPath' },
   { value: 'jsonpath', label: 'JSONPath' },

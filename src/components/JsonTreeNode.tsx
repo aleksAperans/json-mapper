@@ -41,6 +41,7 @@ export function JsonTreeNode({
     setCurrentPath,
     setCopyNotification,
     expandedPaths,
+    collapsedPaths,
     togglePath,
     addBookmark,
     expandSubtree,
@@ -88,17 +89,20 @@ export function JsonTreeNode({
   }
 
   // Determine if this node should be expanded
+  // - If explicitly collapsed, always collapse (overrides everything)
   // - If __EXPAND_ALL__ is active, expand everything
   // - If __EXPAND_TO_DEPTH_2__ is active, expand up to depth 2
   // - If filter is active and node is on path to match, auto-expand
   // - Otherwise, only expanded if explicitly in expandedPaths
-  const isExpanded = expandedPaths.has('__EXPAND_ALL__')
-    ? true // Expand all mode
-    : expandedPaths.has('__EXPAND_TO_DEPTH_2__') && pathDepth <= 2
-      ? true // Depth-limited expansion for large files
-      : matchingPaths.size > 0 && isOnPathToMatch
-        ? true // Auto-expand when filtering to show matches
-        : expandedPaths.has(currentPath) // Progressive disclosure
+  const isExpanded = collapsedPaths.has(currentPath)
+    ? false // Explicitly collapsed in Expand All mode
+    : expandedPaths.has('__EXPAND_ALL__')
+      ? true // Expand all mode
+      : expandedPaths.has('__EXPAND_TO_DEPTH_2__') && pathDepth <= 2
+        ? true // Depth-limited expansion for large files
+        : matchingPaths.size > 0 && isOnPathToMatch
+          ? true // Auto-expand when filtering to show matches
+          : expandedPaths.has(currentPath) // Progressive disclosure
 
   // Helper function to get child entries
   const getChildEntries = (): [string, JsonValue][] => {

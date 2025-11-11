@@ -223,7 +223,7 @@ export function ActionsToolbar() {
             {/* Viewer Mode Selector */}
             <span className="text-sm font-medium text-muted-foreground">Mode:</span>
             <div className="inline-flex items-center rounded-lg border bg-background p-0.5 shadow-sm">
-              {(['text', 'tree', 'table'] as const).map((mode) => (
+              {(['json', 'tree', 'table'] as const).map((mode) => (
                 <button
                   key={mode}
                   onClick={() => setViewerMode(mode)}
@@ -239,8 +239,8 @@ export function ActionsToolbar() {
               ))}
             </div>
 
-            {/* Tree and Text View Actions (show for tree and text modes) */}
-            {(viewerMode === 'tree' || viewerMode === 'text') && (
+            {/* Tree and JSON View Actions (show for tree and json modes) */}
+            {(viewerMode === 'tree' || viewerMode === 'json') && (
               <>
                 <button
               onClick={expandAll}

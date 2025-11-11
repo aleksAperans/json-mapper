@@ -287,7 +287,7 @@ function App() {
           ) : activeFeature === 'viewer' ? (
             viewerMode === 'tree' ? (
               <JsonTree data={jsonData} />
-            ) : viewerMode === 'text' ? (
+            ) : viewerMode === 'json' ? (
               <TextView />
             ) : (
               <TableView />
