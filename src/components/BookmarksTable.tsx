@@ -1,6 +1,6 @@
 import { Trash2, GripVertical } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
-import type { Bookmark, JsonValue } from '@/types'
+import type { JsonValue } from '@/types'
 import { useState } from 'react'
 
 /**

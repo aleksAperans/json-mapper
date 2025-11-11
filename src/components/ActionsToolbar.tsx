@@ -165,19 +165,19 @@ export function ActionsToolbar() {
 
     switch (extractionMode) {
       case 'paths':
-        return extractedData.filter((item) =>
+        return (extractedData as ReturnType<typeof extractAllPaths>).filter((item) =>
           caseSensitive
             ? item.path.includes(query)
             : item.path.toLowerCase().includes(query)
         )
       case 'keys':
-        return extractedData.filter((item) =>
+        return (extractedData as ReturnType<typeof extractAllKeys>).filter((item) =>
           caseSensitive
             ? item.key.includes(query)
             : item.key.toLowerCase().includes(query)
         )
       case 'values':
-        return extractedData.filter((item) => {
+        return (extractedData as ReturnType<typeof extractAllValues>).filter((item) => {
           const pathMatch = caseSensitive
             ? item.path.includes(query)
             : item.path.toLowerCase().includes(query)
@@ -195,13 +195,13 @@ export function ActionsToolbar() {
     let text = ''
     switch (extractionMode) {
       case 'paths':
-        text = filteredData.map((item) => item.path).join('\n')
+        text = (filteredData as ReturnType<typeof extractAllPaths>).map((item) => item.path).join('\n')
         break
       case 'keys':
-        text = filteredData.map((item) => item.key).join('\n')
+        text = (filteredData as ReturnType<typeof extractAllKeys>).map((item) => item.key).join('\n')
         break
       case 'values':
-        text = filteredData
+        text = (filteredData as ReturnType<typeof extractAllValues>)
           .map((item) => `${item.path}: ${JSON.stringify(item.value)}`)
           .join('\n')
         break

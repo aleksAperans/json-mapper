@@ -112,7 +112,7 @@ export function ConvertView({ onPasteFromClipboard, onFileUpload, onLoadExample 
             ignoreComment: true,
             spaces: 2,
           }
-          return convert.js2xml(jsonData, options)
+          return convert.js2xml(jsonData as any, options)
         }
 
         case 'csv':

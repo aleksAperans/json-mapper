@@ -1,4 +1,4 @@
-import { ChevronRight, Bookmark, Copy, Plus } from 'lucide-react'
+import { ChevronRight, Bookmark, Copy, Plus, ChevronsDown } from 'lucide-react'
 import type { JsonValue } from '@/types'
 import { getJsonType } from '@/utils/pathGenerator'
 import { useAppStore } from '@/store/appStore'
@@ -6,7 +6,7 @@ import { generatePath } from '@/utils/pathGenerator'
 import { copyToClipboard } from '@/utils/clipboard'
 import { shouldShowNode } from '@/utils/filter'
 import { findPositionInText } from '@/utils/positionCalculator'
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState } from 'react'
 
 // Lazy loading configuration
 const LAZY_LOAD_THRESHOLD = 100 // Start paginating when children exceed this
@@ -21,7 +21,6 @@ interface JsonTreeNodeProps {
   nodeKey: string
   value: JsonValue
   pathSegments: PathSegment[]
-  isLast?: boolean
   matchingPaths: Set<string>
   emptyPaths?: Set<string>
   hideEmpty?: boolean
@@ -31,7 +30,6 @@ export function JsonTreeNode({
   nodeKey,
   value,
   pathSegments,
-  isLast = false,
   matchingPaths,
   emptyPaths = new Set(),
   hideEmpty = false
@@ -50,7 +48,6 @@ export function JsonTreeNode({
     truncateValues,
     searchQuery,
     searchCaseSensitive,
-    currentSearchIndex,
     originalText,
     setHoverPosition
   } = useAppStore()
@@ -130,9 +127,6 @@ export function JsonTreeNode({
       setDisplayedCount(requiresPagination ? LAZY_LOAD_BATCH_SIZE : totalChildren)
     }
   }, [isExpanded, requiresPagination, totalChildren])
-
-  // Keep track of match indices for this node
-  const [matchIndices] = useState<number[]>([])
 
   // If filter is active and this node doesn't match, hide it
   if (!shouldShow) {
@@ -365,13 +359,12 @@ export function JsonTreeNode({
 
       {isExpandable && isExpanded && (
         <div className="ml-6 border-l border-border pl-2">
-          {childEntries.slice(0, displayedCount).map(([key, childValue], index) => (
+          {childEntries.slice(0, displayedCount).map(([key, childValue]) => (
             <JsonTreeNode
               key={key}
               nodeKey={key}
               value={childValue}
               pathSegments={currentSegments}
-              isLast={index === displayedCount - 1 && !hasMore}
               matchingPaths={matchingPaths}
               emptyPaths={emptyPaths}
               hideEmpty={hideEmpty}

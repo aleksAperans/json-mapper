@@ -16,6 +16,7 @@ import { ConvertView } from './components/ConvertView'
 import { BookmarksModal } from './components/BookmarksModal'
 import { AlertCircle } from 'lucide-react'
 import { parseJSONAsync } from './utils/workerParser'
+import type { JsonValue } from './types'
 
 const EXAMPLE_JSON = {
   "band": {
@@ -133,7 +134,7 @@ function App() {
             setLoadingProgress(progress, message)
           }
         })
-        setJsonData(result.data)
+        setJsonData(result.data as JsonValue)
         setOriginalText(text)
         setFileSize(result.size)
         setMetadata(result.metadata)
@@ -162,7 +163,7 @@ function App() {
           setLoadingProgress(progress, message)
         }
       })
-      setJsonData(result.data)
+      setJsonData(result.data as JsonValue)
       setOriginalText(text)
       setFileSize(result.size)
       setMetadata(result.metadata)
@@ -177,40 +178,6 @@ function App() {
     }
   }, [setJsonData, setOriginalText, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError])
 
-  // Handle fetch from URL
-  const handleFetchFromUrl = useCallback(
-    async (url: string) => {
-      setIsLoading(true)
-      setError(null)
-      setLoadingProgress(0, 'Fetching JSON from URL...')
-      try {
-        const response = await fetch(url)
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-        const text = await response.text()
-        const result = await parseJSONAsync(text, {
-          onProgress: (progress, message) => {
-            setLoadingProgress(progress, message)
-          }
-        })
-        setJsonData(result.data)
-        setOriginalText(text)
-        setFileSize(result.size)
-        setMetadata(result.metadata)
-        addToHistory({ source: 'url', url })
-      } catch (error) {
-        console.error('Failed to fetch JSON from URL:', error)
-        const errorMsg = error instanceof Error ? error.message : 'Failed to fetch JSON from URL'
-        setError(errorMsg)
-      } finally {
-        setIsLoading(false)
-        setLoadingProgress(0, '')
-      }
-    },
-    [setJsonData, setOriginalText, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError]
-  )
-
   // Handle load example
   const handleLoadExample = useCallback(async () => {
     setIsLoading(true)
@@ -223,7 +190,7 @@ function App() {
           setLoadingProgress(progress, message)
         }
       })
-      setJsonData(result.data)
+      setJsonData(result.data as JsonValue)
       setOriginalText(text)
       setFileSize(result.size)
       setMetadata(result.metadata)

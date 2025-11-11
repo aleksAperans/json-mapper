@@ -1,5 +1,10 @@
 import type { PathFormat } from '@/types'
 
+export interface PathSegment {
+  key: string
+  isArrayIndex: boolean
+}
+
 /**
  * Escapes a key for use in a path based on the format
  *
@@ -49,7 +54,7 @@ function escapeKey(key: string, format: PathFormat): string {
  * Generates a path string from an array of path segments
  */
 export function generatePath(
-  segments: Array<{ key: string; isArrayIndex: boolean }>,
+  segments: PathSegment[],
   format: PathFormat = 'jmespath'
 ): string {
   if (segments.length === 0) return ''

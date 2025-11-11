@@ -10,7 +10,7 @@ import type { JsonValue } from '@/types'
 import { useAppStore } from '@/store/appStore'
 import { getJsonType, generatePath } from '@/utils/pathGenerator'
 import { copyToClipboard } from '@/utils/clipboard'
-import { flattenTree, getTotalNodeCount, type FlatTreeNode } from '@/utils/treeFlattener'
+import { flattenTree, type FlatTreeNode } from '@/utils/treeFlattener'
 import { getMatchingPaths, getEmptyPaths } from '@/utils/filter'
 
 interface VirtualJsonTreeProps {

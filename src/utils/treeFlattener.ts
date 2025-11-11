@@ -214,7 +214,7 @@ export function getTotalNodeCount(data: JsonValue): number {
 /**
  * Calculate estimated height for a node (for virtual scrolling)
  */
-export function getNodeHeight(node: FlatTreeNode): number {
+export function getNodeHeight(_node: FlatTreeNode): number {
   // Base height for a single node row in pixels
   const BASE_HEIGHT = 32 // Matches the tree node height
 

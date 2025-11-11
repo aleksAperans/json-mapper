@@ -28,19 +28,19 @@ export function QueryExtractView() {
 
     switch (extractionMode) {
       case 'paths':
-        return extractedData.filter((item) =>
+        return (extractedData as ReturnType<typeof extractAllPaths>).filter((item) =>
           caseSensitive
             ? item.path.includes(query)
             : item.path.toLowerCase().includes(query)
         )
       case 'keys':
-        return extractedData.filter((item) =>
+        return (extractedData as ReturnType<typeof extractAllKeys>).filter((item) =>
           caseSensitive
             ? item.key.includes(query)
             : item.key.toLowerCase().includes(query)
         )
       case 'values':
-        return extractedData.filter((item) => {
+        return (extractedData as ReturnType<typeof extractAllValues>).filter((item) => {
           const pathMatch = caseSensitive
             ? item.path.includes(query)
             : item.path.toLowerCase().includes(query)

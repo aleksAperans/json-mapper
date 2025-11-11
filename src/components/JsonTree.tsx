@@ -79,13 +79,12 @@ export function JsonTree({ data }: JsonTreeProps) {
   return (
     <div className="p-6">
       <div className="ml-2">
-        {entries.map(([key, value], index) => (
+        {entries.map(([key, value]) => (
           <JsonTreeNode
             key={key}
             nodeKey={key}
             value={value}
             pathSegments={[]}
-            isLast={index === entries.length - 1}
             matchingPaths={matchingPaths}
             emptyPaths={emptyPaths}
             hideEmpty={hideEmpty}
