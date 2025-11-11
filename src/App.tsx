@@ -12,10 +12,11 @@ import { CopyNotification } from './components/CopyNotification'
 import { QueryExtractView } from './components/QueryExtractView'
 import { BookmarksModal } from './components/BookmarksModal'
 import { AlertCircle } from 'lucide-react'
+import { calculateJsonSize } from './utils/fileSize'
 
 function App() {
   const { theme } = useThemeStore()
-  const { jsonData, setJsonData, addToHistory, isLoading, setIsLoading, error, setError, activeFeature } = useAppStore()
+  const { jsonData, setJsonData, setFileSize, addToHistory, isLoading, setIsLoading, error, setError, activeFeature } = useAppStore()
 
   // Apply theme to document
   useEffect(() => {
@@ -35,6 +36,7 @@ function App() {
         const text = await file.text()
         const data = JSON.parse(text)
         setJsonData(data)
+        setFileSize(calculateJsonSize(data))
         addToHistory({ source: 'file', name: file.name })
       } catch (error) {
         console.error('Failed to parse JSON:', error)
@@ -44,7 +46,7 @@ function App() {
         setIsLoading(false)
       }
     },
-    [setJsonData, addToHistory, setIsLoading, setError]
+    [setJsonData, setFileSize, addToHistory, setIsLoading, setError]
   )
 
   // Handle paste from clipboard
@@ -55,6 +57,7 @@ function App() {
       const text = await navigator.clipboard.readText()
       const data = JSON.parse(text)
       setJsonData(data)
+      setFileSize(calculateJsonSize(data))
       addToHistory({ source: 'clipboard' })
     } catch (error) {
       console.error('Failed to parse JSON from clipboard:', error)
@@ -63,7 +66,7 @@ function App() {
     } finally {
       setIsLoading(false)
     }
-  }, [setJsonData, addToHistory, setIsLoading, setError])
+  }, [setJsonData, setFileSize, addToHistory, setIsLoading, setError])
 
   // Handle fetch from URL
   const handleFetchFromUrl = useCallback(
@@ -77,6 +80,7 @@ function App() {
         }
         const data = await response.json()
         setJsonData(data)
+        setFileSize(calculateJsonSize(data))
         addToHistory({ source: 'url', url })
       } catch (error) {
         console.error('Failed to fetch JSON from URL:', error)
@@ -86,7 +90,7 @@ function App() {
         setIsLoading(false)
       }
     },
-    [setJsonData, addToHistory, setIsLoading, setError]
+    [setJsonData, setFileSize, addToHistory, setIsLoading, setError]
   )
 
   return (

@@ -11,6 +11,8 @@ interface AppState {
   // JSON data
   jsonData: JsonValue | null
   setJsonData: (data: JsonValue | null) => void
+  fileSize: number | null
+  setFileSize: (size: number | null) => void
 
   // Loading and error states
   isLoading: boolean
@@ -39,6 +41,8 @@ interface AppState {
   setFilterQuery: (query: string) => void
   caseSensitive: boolean
   toggleCaseSensitive: () => void
+  hideEmpty: boolean
+  toggleHideEmpty: () => void
 
   // Expanded paths (for tree view) - tracks which nodes are expanded
   // By default, nodes are collapsed unless they're in this set or at root level
@@ -73,6 +77,8 @@ export const useAppStore = create<AppState>((set) => ({
   // JSON data
   jsonData: null,
   setJsonData: (data) => set({ jsonData: data }),
+  fileSize: null,
+  setFileSize: (size) => set({ fileSize: size }),
 
   // Loading and error states
   isLoading: false,
@@ -101,6 +107,8 @@ export const useAppStore = create<AppState>((set) => ({
   setFilterQuery: (query) => set({ filterQuery: query }),
   caseSensitive: false,
   toggleCaseSensitive: () => set((state) => ({ caseSensitive: !state.caseSensitive })),
+  hideEmpty: false,
+  toggleHideEmpty: () => set((state) => ({ hideEmpty: !state.hideEmpty })),
 
   // Expanded paths (start with empty set - nodes collapsed by default)
   expandedPaths: new Set<string>(),
@@ -130,6 +138,7 @@ export const useAppStore = create<AppState>((set) => ({
   // Clear data
   clearJsonData: () => set({
     jsonData: null,
+    fileSize: null,
     currentPath: null,
     filterQuery: '',
     expandedPaths: new Set<string>(),

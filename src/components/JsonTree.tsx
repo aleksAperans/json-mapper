@@ -2,7 +2,7 @@ import type { JsonValue } from '@/types'
 import { JsonTreeNode } from './JsonTreeNode'
 import { getJsonType } from '@/utils/pathGenerator'
 import { useAppStore } from '@/store/appStore'
-import { getMatchingPaths } from '@/utils/filter'
+import { getMatchingPaths, getEmptyPaths } from '@/utils/filter'
 import { useMemo } from 'react'
 
 interface JsonTreeProps {
@@ -10,13 +10,19 @@ interface JsonTreeProps {
 }
 
 export function JsonTree({ data }: JsonTreeProps) {
-  const { filterQuery, caseSensitive, pathFormat } = useAppStore()
+  const { filterQuery, caseSensitive, pathFormat, hideEmpty } = useAppStore()
 
   // Calculate matching paths when filter is active
   const matchingPaths = useMemo(() => {
     if (!filterQuery.trim()) return new Set<string>()
     return getMatchingPaths(data, filterQuery, pathFormat, { caseSensitive })
   }, [data, filterQuery, pathFormat, caseSensitive])
+
+  // Calculate empty paths when hideEmpty is active
+  const emptyPaths = useMemo(() => {
+    if (!hideEmpty) return new Set<string>()
+    return getEmptyPaths(data, pathFormat)
+  }, [data, pathFormat, hideEmpty])
 
   const valueType = getJsonType(data)
   const isObject = valueType === 'object'
@@ -59,6 +65,8 @@ export function JsonTree({ data }: JsonTreeProps) {
             pathSegments={[]}
             isLast={index === entries.length - 1}
             matchingPaths={matchingPaths}
+            emptyPaths={emptyPaths}
+            hideEmpty={hideEmpty}
           />
         ))}
       </div>

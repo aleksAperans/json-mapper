@@ -1,9 +1,10 @@
-import { ChevronsDown, ChevronsUp, X, Trash2, Copy, CaseSensitive, Bookmark } from 'lucide-react'
+import { ChevronsDown, ChevronsUp, X, Trash2, Copy, CaseSensitive, Bookmark, FileJson, EyeOff } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { copyToClipboard } from '@/utils/clipboard'
 import { cn } from '@/lib/utils'
 import { useMemo } from 'react'
 import { extractAllPaths, extractAllKeys, extractAllValues } from '@/utils/extract'
+import { formatFileSize } from '@/utils/fileSize'
 
 export function ActionsToolbar() {
   const {
@@ -17,7 +18,10 @@ export function ActionsToolbar() {
     setFilterQuery,
     caseSensitive,
     toggleCaseSensitive,
+    hideEmpty,
+    toggleHideEmpty,
     jsonData,
+    fileSize,
     pathFormat,
     setCopyNotification,
     bookmarks,
@@ -115,6 +119,21 @@ export function ActionsToolbar() {
           >
             <ChevronsUp className="h-4 w-4" />
             <span>Collapse All</span>
+          </button>
+
+          {/* Hide Empty Button */}
+          <button
+            onClick={toggleHideEmpty}
+            className={cn(
+              'inline-flex h-8 items-center gap-2 rounded-md px-3 text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+              hideEmpty
+                ? 'bg-primary text-primary-foreground border border-primary'
+                : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
+            )}
+            title="Hide empty values, arrays, and objects"
+          >
+            <EyeOff className="h-4 w-4" />
+            <span>Hide Empty</span>
           </button>
 
           {/* Bookmarks Button */}
@@ -231,6 +250,14 @@ export function ActionsToolbar() {
       )}
 
       <div className="flex-1" />
+
+      {/* File Size Display */}
+      {fileSize !== null && (
+        <div className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-muted/50 px-3 text-sm text-muted-foreground">
+          <FileJson className="h-4 w-4" />
+          <span className="font-mono">{formatFileSize(fileSize)}</span>
+        </div>
+      )}
 
       {/* Clear Button (always visible) */}
       <button

@@ -18,9 +18,19 @@ interface JsonTreeNodeProps {
   pathSegments: PathSegment[]
   isLast?: boolean
   matchingPaths: Set<string>
+  emptyPaths?: Set<string>
+  hideEmpty?: boolean
 }
 
-export function JsonTreeNode({ nodeKey, value, pathSegments, isLast = false, matchingPaths }: JsonTreeNodeProps) {
+export function JsonTreeNode({
+  nodeKey,
+  value,
+  pathSegments,
+  isLast = false,
+  matchingPaths,
+  emptyPaths = new Set(),
+  hideEmpty = false
+}: JsonTreeNodeProps) {
   const { pathFormat, setCurrentPath, setCopyNotification, expandedPaths, togglePath, addBookmark } = useAppStore()
 
   const valueType = getJsonType(value)
@@ -37,8 +47,8 @@ export function JsonTreeNode({ nodeKey, value, pathSegments, isLast = false, mat
 
   // Check if this node should be shown based on filter
   const shouldShow = useMemo(() => {
-    return shouldShowNode(currentPath, matchingPaths)
-  }, [currentPath, matchingPaths])
+    return shouldShowNode(currentPath, matchingPaths, emptyPaths, hideEmpty)
+  }, [currentPath, matchingPaths, emptyPaths, hideEmpty])
 
   // Check if this node is on the path to a match (for auto-expand)
   const isOnPathToMatch = useMemo(() => {
@@ -186,6 +196,8 @@ export function JsonTreeNode({ nodeKey, value, pathSegments, isLast = false, mat
               pathSegments={currentSegments}
               isLast={index === arr.length - 1}
               matchingPaths={matchingPaths}
+              emptyPaths={emptyPaths}
+              hideEmpty={hideEmpty}
             />
           ))}
         </div>
