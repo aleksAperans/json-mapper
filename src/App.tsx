@@ -15,6 +15,7 @@ import { QueryExtractView } from './components/QueryExtractView'
 import { ConvertView } from './components/ConvertView'
 import { BookmarksModal } from './components/BookmarksModal'
 import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal'
+import { AboutModal } from './components/AboutModal'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { AlertCircle } from 'lucide-react'
 import { parseJSONAsync } from './utils/workerParser'
@@ -113,7 +114,9 @@ function App() {
     setError,
     viewerMode,
     isShortcutsOpen,
-    setIsShortcutsOpen
+    setIsShortcutsOpen,
+    isAboutOpen,
+    setIsAboutOpen
   } = useAppStore()
 
   // Initialize keyboard shortcuts
@@ -283,6 +286,10 @@ function App() {
         <KeyboardShortcutsModal
           isOpen={isShortcutsOpen}
           onClose={() => setIsShortcutsOpen(false)}
+        />
+        <AboutModal
+          isOpen={isAboutOpen}
+          onClose={() => setIsAboutOpen(false)}
         />
       </div>
     </ErrorBoundary>

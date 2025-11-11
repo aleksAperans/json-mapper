@@ -120,6 +120,10 @@ interface AppState {
   // Keyboard Shortcuts
   isShortcutsOpen: boolean
   setIsShortcutsOpen: (open: boolean) => void
+
+  // About Modal
+  isAboutOpen: boolean
+  setIsAboutOpen: (open: boolean) => void
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -370,4 +374,8 @@ export const useAppStore = create<AppState>((set) => ({
   // Keyboard Shortcuts
   isShortcutsOpen: false,
   setIsShortcutsOpen: (open) => set({ isShortcutsOpen: open }),
+
+  // About Modal
+  isAboutOpen: false,
+  setIsAboutOpen: (open) => set({ isAboutOpen: open }),
 }))
