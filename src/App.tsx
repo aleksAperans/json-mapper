@@ -17,6 +17,7 @@ import { BookmarksModal } from './components/BookmarksModal'
 import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal'
 import { AboutModal } from './components/AboutModal'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
+import { Analytics } from '@vercel/analytics/react'
 import { AlertCircle } from 'lucide-react'
 import { parseJSONAsync } from './utils/workerParser'
 import type { JsonValue } from './types'
@@ -291,6 +292,7 @@ function App() {
           isOpen={isAboutOpen}
           onClose={() => setIsAboutOpen(false)}
         />
+        <Analytics />
       </div>
     </ErrorBoundary>
   )
