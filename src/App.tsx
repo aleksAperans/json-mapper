@@ -8,6 +8,7 @@ import { LoadingSpinner } from './components/LoadingSpinner'
 import { JsonTree } from './components/JsonTree'
 import { ActionsToolbar } from './components/ActionsToolbar'
 import { FeatureToolbar } from './components/FeatureToolbar'
+import { Footer } from './components/Footer'
 import { CopyNotification } from './components/CopyNotification'
 import { QueryExtractView } from './components/QueryExtractView'
 import { BookmarksModal } from './components/BookmarksModal'
@@ -129,52 +130,59 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col">
-        <Header />
-        <main className="flex-1 flex flex-col overflow-hidden">
+      <div className="h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col">
+        {/* Sticky Header */}
+        <div className="sticky top-0 z-10">
+          <Header />
           <FeatureToolbar />
           <ActionsToolbar />
-          <div className="flex-1 overflow-auto bg-white dark:bg-gray-900">
-            {isLoading ? (
-              <LoadingSpinner />
-            ) : error ? (
-              <div className="flex items-center justify-center h-full p-8">
-                <div className="max-w-md w-full">
-                  <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-8">
-                    <div className="flex flex-col items-center text-center space-y-4">
-                      <div className="rounded-full bg-destructive/10 p-3">
-                        <AlertCircle className="h-8 w-8 text-destructive" />
-                      </div>
-                      <div className="space-y-2">
-                        <h3 className="text-lg font-semibold tracking-tight">
-                          Error Loading JSON
-                        </h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          {error}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => setError(null)}
-                        className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90"
-                      >
-                        Try Again
-                      </button>
+        </div>
+
+        {/* Scrollable Main Content */}
+        <main className="flex-1 overflow-auto bg-white dark:bg-gray-900">
+          {isLoading ? (
+            <LoadingSpinner />
+          ) : error ? (
+            <div className="flex items-center justify-center h-full p-8">
+              <div className="max-w-md w-full">
+                <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-8">
+                  <div className="flex flex-col items-center text-center space-y-4">
+                    <div className="rounded-full bg-destructive/10 p-3">
+                      <AlertCircle className="h-8 w-8 text-destructive" />
                     </div>
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-semibold tracking-tight">
+                        Error Loading JSON
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {error}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setError(null)}
+                      className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90"
+                    >
+                      Try Again
+                    </button>
                   </div>
                 </div>
               </div>
-            ) : !jsonData ? (
-              <EmptyState
-                onPasteFromClipboard={handlePasteFromClipboard}
-                onFileUpload={handleFileUpload}
-              />
-            ) : activeFeature === 'tree' ? (
-              <JsonTree data={jsonData} />
-            ) : (
-              <QueryExtractView />
-            )}
-          </div>
+            </div>
+          ) : !jsonData ? (
+            <EmptyState
+              onPasteFromClipboard={handlePasteFromClipboard}
+              onFileUpload={handleFileUpload}
+            />
+          ) : activeFeature === 'tree' ? (
+            <JsonTree data={jsonData} />
+          ) : (
+            <QueryExtractView />
+          )}
         </main>
+
+        {/* Fixed Footer */}
+        <Footer />
+
         <CopyNotification />
         <BookmarksModal />
       </div>
