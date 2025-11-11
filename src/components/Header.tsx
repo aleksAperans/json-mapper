@@ -12,7 +12,7 @@ export function Header() {
               JSON Mapper
             </h1>
             <p className="text-sm text-muted-foreground">
-              Explore JSON structures with quick path copying
+              Explore, navigate, and map from nested JSON structures
             </p>
           </div>
         </div>

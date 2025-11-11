@@ -39,6 +39,7 @@ export function JsonTreeNode({
   const {
     pathFormat,
     setCurrentPath,
+    setHoverPath,
     setCopyNotification,
     expandedPaths,
     collapsedPaths,
@@ -187,6 +188,11 @@ export function JsonTreeNode({
   }
 
   const handleMouseEnter = () => {
+    // Set hover path in the current pathFormat
+    const path = generatePath(currentSegments, pathFormat)
+    setHoverPath(path)
+
+    // Set hover position for footer display
     if (originalText) {
       const position = findPositionInText(originalText, currentSegments, value)
       if (position) {
@@ -196,6 +202,7 @@ export function JsonTreeNode({
   }
 
   const handleMouseLeave = () => {
+    setHoverPath(null)
     setHoverPosition(null)
   }
 

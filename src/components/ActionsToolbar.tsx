@@ -230,9 +230,10 @@ export function ActionsToolbar() {
                     ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
                 )}
+                title="Tree view"
               >
-                <Network className="h-4 w-4" />
-                Tree
+                <Network className="h-4 w-4 flex-shrink-0" />
+                <span className="hidden lg:inline">Tree</span>
               </button>
               <button
                 onClick={() => setViewerMode('json')}
@@ -242,9 +243,10 @@ export function ActionsToolbar() {
                     ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
                 )}
+                title="JSON view"
               >
-                <Braces className="h-4 w-4" />
-                Json
+                <Braces className="h-4 w-4 flex-shrink-0" />
+                <span className="hidden lg:inline">Json</span>
               </button>
             </div>
 
@@ -256,7 +258,7 @@ export function ActionsToolbar() {
               <>
                 <button
               onClick={expandAll}
-              className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               title={
                 isLargeFile
                   ? `Expand to depth 2 (large file: ${metadata?.nodeCount?.toLocaleString()} nodes)`
@@ -264,23 +266,21 @@ export function ActionsToolbar() {
               }
             >
               <ChevronsDown className="h-4 w-4" />
-              <span>Expand All</span>
             </button>
 
             <button
               onClick={collapseAll}
-              className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               title="Collapse all nodes"
             >
               <ChevronsUp className="h-4 w-4" />
-              <span>Collapse All</span>
             </button>
 
             {/* Hide Empty Button */}
             <button
               onClick={toggleHideEmpty}
               className={cn(
-                'inline-flex h-8 items-center gap-2 rounded-md px-3 text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                'inline-flex h-8 w-8 items-center justify-center rounded-md text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
                 hideEmpty
                   ? 'bg-primary text-primary-foreground border border-primary'
                   : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
@@ -288,14 +288,13 @@ export function ActionsToolbar() {
               title="Hide empty values, arrays, and objects"
             >
               <EyeOff className="h-4 w-4" />
-              <span>Hide Empty</span>
             </button>
 
             {/* Truncate Button */}
             <button
               onClick={toggleTruncateValues}
               className={cn(
-                'inline-flex h-8 items-center gap-2 rounded-md px-3 text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                'inline-flex h-8 w-8 items-center justify-center rounded-md text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
                 truncateValues
                   ? 'bg-primary text-primary-foreground border border-primary'
                   : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
@@ -303,7 +302,6 @@ export function ActionsToolbar() {
               title="Truncate long values with ellipsis"
             >
               <WrapText className="h-4 w-4" />
-              <span>Truncate</span>
             </button>
               </>
             )}
@@ -322,8 +320,10 @@ export function ActionsToolbar() {
                       ? 'bg-primary text-primary-foreground shadow-sm'
                       : 'text-muted-foreground hover:text-foreground'
                   )}
+                  title={`Extract ${mode}`}
                 >
-                  {mode}
+                  <span className="hidden lg:inline">{mode}</span>
+                  <span className="lg:hidden">{mode.charAt(0).toUpperCase()}</span>
                 </button>
               ))}
             </div>
@@ -335,9 +335,10 @@ export function ActionsToolbar() {
               onClick={handleCopyAll}
               disabled={!filteredData || filteredData.length === 0}
               className="inline-flex h-8 items-center gap-1.5 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
+              title="Copy all extracted items"
             >
-              <Copy className="h-3.5 w-3.5" />
-              Copy All
+              <Copy className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className="hidden lg:inline">Copy All</span>
             </button>
           </>
         )}
@@ -350,8 +351,8 @@ export function ActionsToolbar() {
           className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           title="View bookmarks"
         >
-          <Bookmark className="h-4 w-4" />
-          <span>Bookmarks</span>
+          <Bookmark className="h-4 w-4 flex-shrink-0" />
+          <span className="hidden lg:inline">Bookmarks</span>
           {bookmarks.length > 0 && (
             <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
               {bookmarks.length}
@@ -370,8 +371,8 @@ export function ActionsToolbar() {
           )}
           title="Toggle search"
         >
-          <Search className="h-4 w-4" />
-          <span>Search</span>
+          <Search className="h-4 w-4 flex-shrink-0" />
+          <span className="hidden lg:inline">Search</span>
           {searchQuery && (
             <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary-foreground/20 px-1.5 text-[11px] font-semibold">
               ✓
@@ -390,8 +391,8 @@ export function ActionsToolbar() {
           )}
           title="Toggle filter"
         >
-          <Filter className="h-4 w-4" />
-          <span>Filter</span>
+          <Filter className="h-4 w-4 flex-shrink-0" />
+          <span className="hidden lg:inline">Filter</span>
           {filterQuery && (
             <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary-foreground/20 px-1.5 text-[11px] font-semibold">
               ✓
@@ -405,8 +406,8 @@ export function ActionsToolbar() {
           className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium text-destructive shadow-sm transition-colors hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           title="Clear JSON data"
         >
-          <Trash2 className="h-4 w-4" />
-          <span>Clear</span>
+          <Trash2 className="h-4 w-4 flex-shrink-0" />
+          <span className="hidden lg:inline">Clear</span>
         </button>
       </div>
 

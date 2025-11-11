@@ -24,6 +24,7 @@ export function TextView() {
     collapsedPaths,
     pathFormat,
     setCurrentPath,
+    setHoverPath,
     setCopyNotification,
     addBookmark,
     removeBookmark,
@@ -355,10 +356,17 @@ export function TextView() {
   }
 
   const handleMouseEnter = (line: TextLine) => {
+    // Set hover path in the current pathFormat
+    if (line.pathSegments.length > 0) {
+      const path = generatePath(line.pathSegments, pathFormat)
+      setHoverPath(path)
+    }
+    // Set hover position for footer display
     setHoverPosition({ line: line.lineNumber, column: 1 })
   }
 
   const handleMouseLeave = () => {
+    setHoverPath(null)
     setHoverPosition(null)
   }
 

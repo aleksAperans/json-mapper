@@ -1,9 +1,24 @@
 import { FileJson } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { formatFileSize } from '@/utils/fileSize'
+import type { PathFormat } from '@/types'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+
+const formats: { value: PathFormat; label: string }[] = [
+  { value: 'jmespath', label: 'JMESPath' },
+  { value: 'jsonpath', label: 'JSONPath' },
+  { value: 'javascript', label: 'JavaScript' },
+  { value: 'python', label: 'Python' },
+]
 
 export function Footer() {
-  const { fileSize, metadata, hoverPosition } = useAppStore()
+  const { fileSize, metadata, hoverPosition, pathFormat, setPathFormat, hoverPath, currentPath } = useAppStore()
 
   return (
     <footer className="border-t bg-muted/40 px-4 py-2">
@@ -30,8 +45,8 @@ export function Footer() {
           )}
         </div>
 
-        {/* Right side: Position info and app name */}
-        <div className="flex items-center gap-4">
+        {/* Right side: Position info, path format, and path display */}
+        <div className="flex items-center gap-3">
           {hoverPosition && (
             <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
               <span className="font-mono">
@@ -39,8 +54,26 @@ export function Footer() {
               </span>
             </div>
           )}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>JSON Mapper</span>
+
+          {/* Path Format Selector */}
+          <Select value={pathFormat} onValueChange={(value) => setPathFormat(value as PathFormat)}>
+            <SelectTrigger className="h-8 w-[140px]">
+              <SelectValue placeholder="Select format" />
+            </SelectTrigger>
+            <SelectContent>
+              {formats.map((format) => (
+                <SelectItem key={format.value} value={format.value}>
+                  {format.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Current Path Display */}
+          <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 shadow-sm overflow-x-auto max-w-2xl">
+            <code className="text-sm font-mono text-muted-foreground whitespace-nowrap">
+              {hoverPath || currentPath || '—'}
+            </code>
           </div>
         </div>
       </div>

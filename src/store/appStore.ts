@@ -33,9 +33,13 @@ interface AppState {
   } | null
   setMetadata: (metadata: { nodeCount: number; maxDepth: number } | null) => void
 
-  // Current path
+  // Current path (set when copying)
   currentPath: string | null
   setCurrentPath: (path: string | null) => void
+
+  // Hover path (dynamically updated as user hovers over rows)
+  hoverPath: string | null
+  setHoverPath: (path: string | null) => void
 
   // Hover position (for displaying line/column in footer)
   hoverPosition: { line: number; column: number } | null
@@ -139,6 +143,10 @@ export const useAppStore = create<AppState>((set) => ({
   // Current path
   currentPath: null,
   setCurrentPath: (path) => set({ currentPath: path }),
+
+  // Hover path
+  hoverPath: null,
+  setHoverPath: (path) => set({ hoverPath: path }),
 
   // Hover position
   hoverPosition: null,

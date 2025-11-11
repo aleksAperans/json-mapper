@@ -138,8 +138,8 @@ export function BookmarksTable() {
         </div>
         <h3 className="text-lg font-semibold mb-2">No bookmarks yet</h3>
         <p className="text-sm text-muted-foreground max-w-sm">
-          Start bookmarking JSON paths by clicking the bookmark button on any row in
-          the tree view.
+          Start bookmarking paths by clicking the bookmark button on any row in
+          the tree or JSON view.
         </p>
       </div>
     )

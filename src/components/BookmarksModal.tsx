@@ -59,7 +59,7 @@ export function BookmarksModal() {
         <DialogHeader>
           <DialogTitle>Bookmarks ({bookmarks.length})</DialogTitle>
           <DialogDescription>
-            View and manage your saved JSON paths
+            View and manage your saved paths
           </DialogDescription>
         </DialogHeader>
 
