@@ -1,4 +1,4 @@
-import { ChevronRight, Bookmark, Copy, Plus, ChevronsDown } from 'lucide-react'
+import { ChevronRight, Bookmark, Copy, Plus } from 'lucide-react'
 import type { JsonValue } from '@/types'
 import { getJsonType } from '@/utils/pathGenerator'
 import { useAppStore } from '@/store/appStore'
@@ -44,8 +44,8 @@ export function JsonTreeNode({
     collapsedPaths,
     togglePath,
     addBookmark,
-    expandSubtree,
-    jsonData,
+    removeBookmark,
+    bookmarks,
     truncateValues,
     searchQuery,
     searchCaseSensitive,
@@ -58,14 +58,21 @@ export function JsonTreeNode({
   const isExpandable = valueType === 'object' || valueType === 'array'
   const isArray = valueType === 'array'
 
+  // Check if this node is an array element (parent is an array)
+  const isArrayElement = !isNaN(Number(nodeKey)) && pathSegments.length > 0
 
   const currentSegments = [
     ...pathSegments,
-    { key: nodeKey, isArrayIndex: !isNaN(Number(nodeKey)) && pathSegments.length > 0 }
+    { key: nodeKey, isArrayIndex: isArrayElement }
   ]
 
   const currentPath = generatePath(currentSegments, 'jmespath')
   const pathDepth = currentSegments.length
+
+  // Check if this path is bookmarked
+  const isBookmarked = useMemo(() => {
+    return bookmarks.some(bookmark => bookmark.path === currentPath)
+  }, [bookmarks, currentPath])
 
   // Check if this node should be shown based on filter
   const shouldShow = useMemo(() => {
@@ -82,11 +89,6 @@ export function JsonTreeNode({
     }
     return false
   }, [currentPath, matchingPaths])
-
-  // If filter is active and this node doesn't match, hide it
-  if (!shouldShow) {
-    return null
-  }
 
   // Determine if this node should be expanded
   // - If explicitly collapsed, always collapse (overrides everything)
@@ -128,6 +130,14 @@ export function JsonTreeNode({
     }
   }, [isExpanded, requiresPagination, totalChildren])
 
+  // Keep track of match indices for this node
+  const [matchIndices] = useState<number[]>([])
+
+  // If filter is active and this node doesn't match, hide it
+  if (!shouldShow) {
+    return null
+  }
+
   const hasMore = displayedCount < totalChildren
   const remainingCount = totalChildren - displayedCount
 
@@ -153,18 +163,21 @@ export function JsonTreeNode({
   const handleBookmark = (e: React.MouseEvent) => {
     e.stopPropagation()
     const path = generatePath(currentSegments, pathFormat)
-    addBookmark(path, value, pathFormat)
-    setCopyNotification(true, `Bookmarked: ${path}`)
-    setTimeout(() => setCopyNotification(false), 2000)
-  }
 
-  const handleExpandSubtree = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (isExpandable && jsonData) {
-      expandSubtree(currentPath, jsonData)
-      setCopyNotification(true, `Expanded all children of ${nodeKey}`)
-      setTimeout(() => setCopyNotification(false), 2000)
+    // Check if already bookmarked
+    const existingBookmark = bookmarks.find(b => b.path === path)
+
+    if (existingBookmark) {
+      // Remove bookmark
+      removeBookmark(existingBookmark.id)
+      setCopyNotification(true, `Removed bookmark: ${path}`)
+    } else {
+      // Add bookmark
+      addBookmark(path, value, pathFormat)
+      setCopyNotification(true, `Bookmarked: ${path}`)
     }
+
+    setTimeout(() => setCopyNotification(false), 2000)
   }
 
   const handleToggle = () => {
@@ -185,9 +198,6 @@ export function JsonTreeNode({
   const handleMouseLeave = () => {
     setHoverPosition(null)
   }
-
-  // Keep track of match indices for this node
-  const [matchIndices] = useState<number[]>([])
 
   // Helper function to highlight search matches in text
   const highlightText = (text: string, className: string, matchType: 'key' | 'value' = 'value') => {
@@ -281,7 +291,11 @@ export function JsonTreeNode({
   return (
     <div className="font-mono text-base">
       <div
-        className="flex items-start hover:bg-gray-100 dark:hover:bg-gray-800 py-1 px-2 rounded group"
+        className={`flex items-start py-1 px-2 rounded group ${
+          isBookmarked
+            ? 'bg-blue-50 dark:bg-blue-950/30 border-l-2 border-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30'
+            : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+        }`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -303,7 +317,7 @@ export function JsonTreeNode({
           title="Click to copy path"
         >
           {highlightText(
-            isArray && !isNaN(Number(nodeKey)) ? `[${nodeKey}]` : nodeKey,
+            isArrayElement ? `[${nodeKey}]` : nodeKey,
             'text-json-key-light dark:text-json-key-dark',
             'key'
           )}
@@ -332,23 +346,14 @@ export function JsonTreeNode({
 
         <button
           onClick={handleBookmark}
-          className="ml-1 opacity-0 group-hover:opacity-100 flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded border border-border text-xs text-muted-foreground hover:text-primary hover:border-primary transition-all"
-          title="Bookmark path"
+          className={`ml-1 ${
+            isBookmarked ? 'opacity-100 text-blue-600 border-blue-600' : 'opacity-0 group-hover:opacity-100'
+          } flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded border border-border text-xs hover:text-primary hover:border-primary transition-all`}
+          title={isBookmarked ? 'Remove bookmark' : 'Bookmark path'}
         >
-          <Bookmark className="w-3 h-3" />
+          <Bookmark className={`w-3 h-3 ${isBookmarked ? 'fill-blue-600' : ''}`} />
           <span>bookmark</span>
         </button>
-
-        {isExpandable && (
-          <button
-            onClick={handleExpandSubtree}
-            className="ml-1 opacity-0 group-hover:opacity-100 flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded border border-border text-xs text-muted-foreground hover:text-primary hover:border-primary transition-all"
-            title="Expand all children"
-          >
-            <ChevronsDown className="w-3 h-3" />
-            <span>expand all</span>
-          </button>
-        )}
       </div>
 
       {isExpandable && isExpanded && (

@@ -68,4 +68,8 @@ export interface Bookmark {
   value: JsonValue
   pathFormat: PathFormat
   timestamp: number
+  type: string // Data type: string, number, array, object, boolean, null
+  targetPath: string // Destination path in target system
+  transformation: string // Data transformation rules
+  notes: string // General notes
 }

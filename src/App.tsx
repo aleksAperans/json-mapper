@@ -7,7 +7,6 @@ import { EmptyState } from './components/EmptyState'
 import { LoadingSpinner } from './components/LoadingSpinner'
 import { JsonTree } from './components/JsonTree'
 import { TextView } from './components/TextView'
-import { TableView } from './components/TableView'
 import { ActionsToolbar } from './components/ActionsToolbar'
 import { FeatureToolbar } from './components/FeatureToolbar'
 import { Footer } from './components/Footer'
@@ -287,10 +286,8 @@ function App() {
           ) : activeFeature === 'viewer' ? (
             viewerMode === 'tree' ? (
               <JsonTree data={jsonData} />
-            ) : viewerMode === 'json' ? (
-              <TextView />
             ) : (
-              <TableView />
+              <TextView />
             )
           ) : (
             <QueryExtractView />

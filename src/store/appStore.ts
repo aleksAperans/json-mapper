@@ -6,6 +6,7 @@ import type {
   Bookmark
 } from '@/types'
 import { loadBookmarks, saveBookmarks } from '@/utils/localStorage'
+import { getJsonType } from '@/utils/pathGenerator'
 
 interface AppState {
   // JSON data
@@ -49,8 +50,8 @@ interface AppState {
   setActiveFeature: (feature: 'viewer' | 'query') => void
 
   // Viewer mode (for the viewer feature)
-  viewerMode: 'json' | 'tree' | 'table'
-  setViewerMode: (mode: 'json' | 'tree' | 'table') => void
+  viewerMode: 'json' | 'tree'
+  setViewerMode: (mode: 'json' | 'tree') => void
 
   // Query & Extract feature
   extractionMode: 'paths' | 'keys' | 'values'
@@ -105,7 +106,9 @@ interface AppState {
   // Bookmarks
   bookmarks: Bookmark[]
   addBookmark: (path: string, value: JsonValue, pathFormat: PathFormat) => void
+  updateBookmark: (id: string, updates: Partial<Omit<Bookmark, 'id' | 'timestamp'>>) => void
   removeBookmark: (id: string) => void
+  reorderBookmarks: (startIndex: number, endIndex: number) => void
   clearBookmarks: () => void
   isBookmarksOpen: boolean
   setIsBookmarksOpen: (open: boolean) => void
@@ -307,20 +310,41 @@ export const useAppStore = create<AppState>((set) => ({
   bookmarks: loadBookmarks(),
   addBookmark: (path, value, pathFormat) =>
     set((state) => {
+      const type = getJsonType(value)
       const newBookmark: Bookmark = {
         id: crypto.randomUUID(),
         path,
         value,
         pathFormat,
         timestamp: Date.now(),
+        type,
+        targetPath: '',
+        transformation: '',
+        notes: '',
       }
       const newBookmarks = [...state.bookmarks, newBookmark]
+      saveBookmarks(newBookmarks)
+      return { bookmarks: newBookmarks }
+    }),
+  updateBookmark: (id, updates) =>
+    set((state) => {
+      const newBookmarks = state.bookmarks.map((bookmark) =>
+        bookmark.id === id ? { ...bookmark, ...updates } : bookmark
+      )
       saveBookmarks(newBookmarks)
       return { bookmarks: newBookmarks }
     }),
   removeBookmark: (id) =>
     set((state) => {
       const newBookmarks = state.bookmarks.filter((b) => b.id !== id)
+      saveBookmarks(newBookmarks)
+      return { bookmarks: newBookmarks }
+    }),
+  reorderBookmarks: (startIndex, endIndex) =>
+    set((state) => {
+      const newBookmarks = Array.from(state.bookmarks)
+      const [removed] = newBookmarks.splice(startIndex, 1)
+      newBookmarks.splice(endIndex, 0, removed)
       saveBookmarks(newBookmarks)
       return { bookmarks: newBookmarks }
     }),

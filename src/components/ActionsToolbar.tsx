@@ -1,4 +1,4 @@
-import { ChevronsDown, ChevronsUp, X, Trash2, Copy, CaseSensitive, Bookmark, EyeOff, Filter, Search, ChevronLeft, ChevronRight, WrapText } from 'lucide-react'
+import { ChevronsDown, ChevronsUp, X, Trash2, Copy, CaseSensitive, Bookmark, EyeOff, Filter, Search, ChevronLeft, ChevronRight, WrapText, Braces, Network } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { copyToClipboard } from '@/utils/clipboard'
 import { cn } from '@/lib/utils'
@@ -221,23 +221,35 @@ export function ActionsToolbar() {
         {activeFeature === 'viewer' ? (
           <>
             {/* Viewer Mode Selector */}
-            <span className="text-sm font-medium text-muted-foreground">Mode:</span>
             <div className="inline-flex items-center rounded-lg border bg-background p-0.5 shadow-sm">
-              {(['json', 'tree', 'table'] as const).map((mode) => (
-                <button
-                  key={mode}
-                  onClick={() => setViewerMode(mode)}
-                  className={cn(
-                    'rounded-md px-3 py-1 text-sm font-medium capitalize transition-all',
-                    viewerMode === mode
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  {mode}
-                </button>
-              ))}
+              <button
+                onClick={() => setViewerMode('tree')}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-sm font-medium transition-all',
+                  viewerMode === 'tree'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <Network className="h-4 w-4" />
+                Tree
+              </button>
+              <button
+                onClick={() => setViewerMode('json')}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-sm font-medium transition-all',
+                  viewerMode === 'json'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <Braces className="h-4 w-4" />
+                Json
+              </button>
             </div>
+
+            {/* Vertical Separator */}
+            <div className="h-8 w-px bg-border" />
 
             {/* Tree and JSON View Actions (show for tree and json modes) */}
             {(viewerMode === 'tree' || viewerMode === 'json') && (
@@ -293,28 +305,12 @@ export function ActionsToolbar() {
               <WrapText className="h-4 w-4" />
               <span>Truncate</span>
             </button>
-
-            {/* Bookmarks Button */}
-            <button
-              onClick={() => setIsBookmarksOpen(true)}
-              className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              title="View bookmarks"
-            >
-              <Bookmark className="h-4 w-4" />
-              <span>Bookmarks</span>
-              {bookmarks.length > 0 && (
-                <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
-                  {bookmarks.length}
-                </span>
-              )}
-            </button>
               </>
             )}
           </>
         ) : (
           <>
             {/* Query & Extract Actions */}
-            <span className="text-sm font-medium text-muted-foreground">Extract:</span>
             <div className="inline-flex items-center rounded-lg border bg-background p-0.5 shadow-sm">
               {(['paths', 'keys', 'values'] as const).map((mode) => (
                 <button
@@ -332,6 +328,9 @@ export function ActionsToolbar() {
               ))}
             </div>
 
+            {/* Vertical Separator */}
+            <div className="h-8 w-px bg-border" />
+
             <button
               onClick={handleCopyAll}
               disabled={!filteredData || filteredData.length === 0}
@@ -344,6 +343,21 @@ export function ActionsToolbar() {
         )}
 
         <div className="flex-1" />
+
+        {/* Bookmarks Button */}
+        <button
+          onClick={() => setIsBookmarksOpen(true)}
+          className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          title="View bookmarks"
+        >
+          <Bookmark className="h-4 w-4" />
+          <span>Bookmarks</span>
+          {bookmarks.length > 0 && (
+            <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
+              {bookmarks.length}
+            </span>
+          )}
+        </button>
 
         {/* Search Button */}
         <button
