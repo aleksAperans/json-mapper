@@ -71,7 +71,7 @@ function EditableCell({ value, onSave, className = '' }: EditableCellProps) {
         onChange={(e) => setEditValue(e.target.value)}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        className={`w-full p-1 text-xs font-mono border border-primary rounded focus:outline-none focus:ring-1 focus:ring-primary resize-none ${className}`}
+        className={`w-full p-1 text-xs font-mono border border-primary bg-background text-foreground rounded focus:outline-none focus:ring-1 focus:ring-primary resize-none ${className}`}
         autoFocus
         rows={1}
         style={{ minHeight: '24px' }}
