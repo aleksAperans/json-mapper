@@ -26,6 +26,8 @@ export function TextView() {
     setCurrentPath,
     setCopyNotification,
     addBookmark,
+    removeBookmark,
+    bookmarks,
     setHoverPosition,
     truncateValues,
     togglePath,
@@ -335,8 +337,20 @@ export function TextView() {
   const handleBookmark = async (line: TextLine, e: React.MouseEvent) => {
     e.stopPropagation()
     const path = generatePath(line.pathSegments, pathFormat)
-    addBookmark(path, line.value || null, pathFormat)
-    setCopyNotification(true, `Bookmarked: ${path}`)
+
+    // Check if already bookmarked
+    const existingBookmark = bookmarks.find(b => b.path === path)
+
+    if (existingBookmark) {
+      // Remove bookmark
+      removeBookmark(existingBookmark.id)
+      setCopyNotification(true, `Removed bookmark: ${path}`)
+    } else {
+      // Add bookmark
+      addBookmark(path, line.value || null, pathFormat)
+      setCopyNotification(true, `Bookmarked: ${path}`)
+    }
+
     setTimeout(() => setCopyNotification(false), 2000)
   }
 
@@ -491,13 +505,23 @@ export function TextView() {
   return (
     <div className="h-full overflow-auto bg-white dark:bg-gray-900 p-4">
       <div className="font-mono text-sm leading-relaxed">
-        {renderedLines.map((line) => (
-          <div
-            key={line.lineNumber}
-            className="flex items-stretch hover:bg-gray-100 dark:hover:bg-gray-800 py-0.5 px-2 rounded group"
-            onMouseEnter={() => handleMouseEnter(line)}
-            onMouseLeave={handleMouseLeave}
-          >
+        {renderedLines.map((line) => {
+          // Check if this line's path is bookmarked
+          const linePath = generatePath(line.pathSegments, 'jmespath')
+          const isBookmarked = bookmarks.some(bookmark => bookmark.path === linePath)
+
+          return (
+            <div
+              key={line.lineNumber}
+              className={cn(
+                'flex items-stretch py-0.5 px-2 rounded group',
+                isBookmarked
+                  ? 'bg-blue-50 dark:bg-blue-950/30 border-l-2 border-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+              )}
+              onMouseEnter={() => handleMouseEnter(line)}
+              onMouseLeave={handleMouseLeave}
+            >
             {/* Line number */}
             <span className="inline-block w-12 text-right mr-4 text-muted-foreground select-none flex-shrink-0">
               {line.lineNumber}
@@ -548,16 +572,22 @@ export function TextView() {
                 </button>
                 <button
                   onClick={(e) => handleBookmark(line, e)}
-                  className="ml-1 opacity-0 group-hover:opacity-100 flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded border border-border text-xs text-muted-foreground hover:text-primary hover:border-primary transition-all"
-                  title="Bookmark"
+                  className={cn(
+                    'ml-1 flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded border text-xs transition-all',
+                    isBookmarked
+                      ? 'opacity-100 text-blue-600 border-blue-600'
+                      : 'opacity-0 group-hover:opacity-100 border-border text-muted-foreground hover:text-primary hover:border-primary'
+                  )}
+                  title={isBookmarked ? 'Remove bookmark' : 'Bookmark'}
                 >
-                  <Bookmark className="w-3 h-3" />
+                  <Bookmark className={cn('w-3 h-3', isBookmarked ? 'fill-blue-600' : '')} />
                   <span>bookmark</span>
                 </button>
               </>
             )}
           </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
