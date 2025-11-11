@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useAppStore } from '@/store/appStore'
-import { Copy, Download, FileCode, FileText, Table } from 'lucide-react'
+import { Copy, Download, FileCode, FileText, Table, Clipboard, FileUp, FileJson } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { copyToClipboard } from '@/utils/clipboard'
 import yaml from 'js-yaml'
@@ -74,9 +74,24 @@ function jsonToCSV(data: any): string {
   return [header, ...rows].join('\n')
 }
 
-export function ConvertView() {
+interface ConvertViewProps {
+  onPasteFromClipboard?: () => void
+  onFileUpload?: (file: File) => void
+  onLoadExample?: () => void
+}
+
+export function ConvertView({ onPasteFromClipboard, onFileUpload, onLoadExample }: ConvertViewProps = {}) {
   const { jsonData, setCopyNotification } = useAppStore()
   const [selectedFormat, setSelectedFormat] = useState<ConvertFormat>('yaml')
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file && onFileUpload) {
+      onFileUpload(file)
+    }
+  }
+
+  const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0
 
   // Convert JSON to selected format
   const convertedOutput = useMemo(() => {
@@ -155,21 +170,11 @@ export function ConvertView() {
     },
   ]
 
-  if (!jsonData) {
-    return (
-      <div className="flex items-center justify-center h-full p-8">
-        <div className="text-center">
-          <p className="text-muted-foreground">No JSON data loaded</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="h-full flex flex-col">
       {/* Format Selection Bar */}
       <div className="border-b bg-muted/40 px-4 py-2.5">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
           {/* Format Buttons */}
           <div className="inline-flex items-center rounded-lg border bg-background p-0.5 shadow-sm">
             {formats.map((format) => (
@@ -190,11 +195,15 @@ export function ConvertView() {
             ))}
           </div>
 
+          {/* Vertical Separator */}
+          <div className="h-8 w-px bg-border" />
+
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopy}
-              className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+              disabled={!jsonData}
+              className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
               title="Copy to clipboard"
             >
               <Copy className="h-4 w-4 flex-shrink-0" />
@@ -202,7 +211,8 @@ export function ConvertView() {
             </button>
             <button
               onClick={handleDownload}
-              className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+              disabled={!jsonData}
+              className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
               title="Download file"
             >
               <Download className="h-4 w-4 flex-shrink-0" />
@@ -214,9 +224,62 @@ export function ConvertView() {
 
       {/* Output Display */}
       <div className="flex-1 overflow-auto p-4">
-        <pre className="font-mono text-sm bg-muted/30 rounded-lg p-4 overflow-x-auto">
-          <code>{convertedOutput}</code>
-        </pre>
+        {!jsonData ? (
+          <div className="flex flex-col items-center justify-center text-center h-full py-8">
+            <div className="mt-4 w-full max-w-sm flex flex-col gap-2">
+              <button
+                onClick={onPasteFromClipboard}
+                className="group flex w-full items-center justify-between rounded-lg border bg-card px-5 py-3 text-left shadow-sm transition-all hover:bg-accent hover:shadow-md"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Clipboard className="h-5 w-5" />
+                  </div>
+                  <span className="text-sm font-medium">Paste from Clipboard</span>
+                </div>
+                <kbd className="rounded bg-muted px-2 py-1 text-xs font-semibold text-muted-foreground">
+                  {isMac ? '⌘' : 'Ctrl+'} V
+                </kbd>
+              </button>
+
+              <label className="group cursor-pointer">
+                <input
+                  type="file"
+                  accept=".json,application/json"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <div className="flex w-full items-center justify-between rounded-lg border bg-card px-5 py-3 shadow-sm transition-all hover:bg-accent hover:shadow-md">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <FileUp className="h-5 w-5" />
+                    </div>
+                    <span className="text-sm font-medium">Open File</span>
+                  </div>
+                  <kbd className="rounded bg-muted px-2 py-1 text-xs font-semibold text-muted-foreground">
+                    {isMac ? '⌘' : 'Ctrl+'} O
+                  </kbd>
+                </div>
+              </label>
+
+              <button
+                onClick={onLoadExample}
+                className="group flex w-full items-center justify-between rounded-lg border bg-card px-5 py-3 text-left shadow-sm transition-all hover:bg-accent hover:shadow-md"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <FileJson className="h-5 w-5" />
+                  </div>
+                  <span className="text-sm font-medium">Load Example</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <pre className="font-mono text-sm bg-muted/30 rounded-lg p-4 overflow-x-auto">
+            <code>{convertedOutput}</code>
+          </pre>
+        )}
       </div>
     </div>
   )

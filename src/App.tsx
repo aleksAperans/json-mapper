@@ -278,6 +278,12 @@ function App() {
                 </div>
               </div>
             </div>
+          ) : activeFeature === 'convert' ? (
+            <ConvertView
+              onPasteFromClipboard={handlePasteFromClipboard}
+              onFileUpload={handleFileUpload}
+              onLoadExample={handleLoadExample}
+            />
           ) : !jsonData ? (
             <EmptyState
               onPasteFromClipboard={handlePasteFromClipboard}
@@ -290,10 +296,8 @@ function App() {
             ) : (
               <TextView />
             )
-          ) : activeFeature === 'query' ? (
-            <QueryExtractView />
           ) : (
-            <ConvertView />
+            <QueryExtractView />
           )}
         </main>
 
