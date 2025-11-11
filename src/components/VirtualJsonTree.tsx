@@ -31,7 +31,10 @@ export function VirtualJsonTree({ data }: VirtualJsonTreeProps) {
     jsonData,
     filterQuery,
     caseSensitive,
-    hideEmpty
+    hideEmpty,
+    truncateValues,
+    searchQuery,
+    searchCaseSensitive
   } = useAppStore()
 
   // Calculate matching and empty paths for filtering
@@ -55,6 +58,60 @@ export function VirtualJsonTree({ data }: VirtualJsonTreeProps) {
     })
   }, [data, expandedPaths, matchingPaths, emptyPaths, hideEmpty])
 
+  // Helper function to highlight search matches in text
+  const highlightText = (text: string, className: string, matchType: 'key' | 'value' = 'value') => {
+    if (!searchQuery.trim()) {
+      return <span className={className}>{text}</span>
+    }
+
+    const query = searchCaseSensitive ? searchQuery : searchQuery.toLowerCase()
+    const textToSearch = searchCaseSensitive ? text : text.toLowerCase()
+
+    const parts: React.ReactNode[] = []
+    let lastIndex = 0
+    let index = textToSearch.indexOf(query)
+
+    while (index !== -1) {
+      // Add text before match
+      if (index > lastIndex) {
+        parts.push(
+          <span key={`text-${lastIndex}`}>
+            {text.substring(lastIndex, index)}
+          </span>
+        )
+      }
+
+      // Calculate a unique ID for this match based on position
+      const matchId = `match-virtual-${matchType}-${lastIndex}-${index}`
+
+      // Add highlighted match
+      parts.push(
+        <mark
+          key={`mark-${index}`}
+          id={matchId}
+          data-search-match={matchId}
+          className="bg-yellow-300 dark:bg-yellow-600/80 text-gray-900 dark:text-gray-100 px-0.5 rounded"
+        >
+          {text.substring(index, index + query.length)}
+        </mark>
+      )
+
+      lastIndex = index + query.length
+      index = textToSearch.indexOf(query, lastIndex)
+    }
+
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(
+        <span key={`text-${lastIndex}`}>
+          {text.substring(lastIndex)}
+        </span>
+      )
+    }
+
+    return <span className={className}>{parts}</span>
+  }
+
   // Virtual scrolling
   const virtualizer = useVirtualizer({
     count: flatNodes.length,
@@ -70,12 +127,21 @@ export function VirtualJsonTree({ data }: VirtualJsonTreeProps) {
     const valueType = getJsonType(value)
 
     switch (valueType) {
-      case 'string':
-        return <span className="text-json-string-light dark:text-json-string-dark">"{value as string}"</span>
+      case 'string': {
+        const stringValue = value as string
+        const highlighted = highlightText(stringValue, 'text-json-string-light dark:text-json-string-dark', 'value')
+        return (
+          <>
+            <span className="text-json-string-light dark:text-json-string-dark">"</span>
+            {highlighted}
+            <span className="text-json-string-light dark:text-json-string-dark">"</span>
+          </>
+        )
+      }
       case 'number':
-        return <span className="text-json-number-light dark:text-json-number-dark">{value as number}</span>
+        return highlightText(String(value), 'text-json-number-light dark:text-json-number-dark', 'value')
       case 'boolean':
-        return <span className="text-json-boolean-light dark:text-json-boolean-dark">{String(value)}</span>
+        return highlightText(String(value), 'text-json-boolean-light dark:text-json-boolean-dark', 'value')
       case 'null':
         return <span className="text-json-null-light dark:text-json-null-dark">null</span>
       default:
@@ -164,9 +230,24 @@ export function VirtualJsonTree({ data }: VirtualJsonTreeProps) {
                 left: 0,
                 width: '100%',
                 transform: `translateY(${virtualItem.start}px)`,
-                paddingLeft: `${(node.depth - 1) * 24 + 8}px`
+                paddingLeft: `${Math.max(0, (node.depth - 1) * 24 + 8)}px`
               }}
             >
+              {/* Render vertical lines for each depth level */}
+              {Array.from({ length: node.depth - 1 }, (_, i) => (
+                <div
+                  key={`border-${i}`}
+                  style={{
+                    position: 'absolute',
+                    left: `${i * 24 + 8}px`,
+                    top: 0,
+                    bottom: 0,
+                    width: '1px',
+                    backgroundColor: 'hsl(var(--border))'
+                  }}
+                />
+              ))}
+
               <div className="flex items-start hover:bg-gray-100 dark:hover:bg-gray-800 py-1 px-2 rounded group font-mono text-base">
                 {node.isExpandable ? (
                   <button
@@ -182,16 +263,20 @@ export function VirtualJsonTree({ data }: VirtualJsonTreeProps) {
                 )}
 
                 <span
-                  className="text-json-key-light dark:text-json-key-dark cursor-pointer flex-shrink-0"
+                  className="cursor-pointer flex-shrink-0"
                   onClick={(e) => handleCopyPath(node, e)}
                   title="Click to copy path"
                 >
-                  {isArray && !isNaN(Number(nodeKey)) ? `[${nodeKey}]` : nodeKey}
+                  {highlightText(
+                    isArray && !isNaN(Number(nodeKey)) ? `[${nodeKey}]` : nodeKey,
+                    'text-json-key-light dark:text-json-key-dark',
+                    'key'
+                  )}
                 </span>
                 <span className="mx-2 text-gray-500">:</span>
 
                 {!node.isExpandable ? (
-                  <span className="truncate">{renderValue(node.value)}</span>
+                  <span className={truncateValues && !searchQuery.trim() ? 'truncate' : ''}>{renderValue(node.value)}</span>
                 ) : !node.isExpanded ? (
                   <span
                     className="truncate text-gray-500 dark:text-gray-400 cursor-pointer"

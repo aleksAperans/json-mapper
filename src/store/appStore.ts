@@ -53,6 +53,22 @@ interface AppState {
   toggleCaseSensitive: () => void
   hideEmpty: boolean
   toggleHideEmpty: () => void
+  truncateValues: boolean
+  toggleTruncateValues: () => void
+  isFilterOpen: boolean
+  setIsFilterOpen: (open: boolean) => void
+
+  // Search (highlights matches without filtering)
+  searchQuery: string
+  setSearchQuery: (query: string) => void
+  searchCaseSensitive: boolean
+  toggleSearchCaseSensitive: () => void
+  isSearchOpen: boolean
+  setIsSearchOpen: (open: boolean) => void
+  currentSearchIndex: number
+  setCurrentSearchIndex: (index: number) => void
+  searchMatchCount: number
+  setSearchMatchCount: (count: number) => void
 
   // Expanded paths (for tree view) - tracks which nodes are expanded
   // By default, nodes are collapsed unless they're in this set or at root level
@@ -127,6 +143,22 @@ export const useAppStore = create<AppState>((set) => ({
   toggleCaseSensitive: () => set((state) => ({ caseSensitive: !state.caseSensitive })),
   hideEmpty: false,
   toggleHideEmpty: () => set((state) => ({ hideEmpty: !state.hideEmpty })),
+  truncateValues: true,
+  toggleTruncateValues: () => set((state) => ({ truncateValues: !state.truncateValues })),
+  isFilterOpen: false,
+  setIsFilterOpen: (open) => set({ isFilterOpen: open }),
+
+  // Search (highlights matches without filtering)
+  searchQuery: '',
+  setSearchQuery: (query) => set({ searchQuery: query, currentSearchIndex: 0 }),
+  searchCaseSensitive: false,
+  toggleSearchCaseSensitive: () => set((state) => ({ searchCaseSensitive: !state.searchCaseSensitive, currentSearchIndex: 0 })),
+  isSearchOpen: false,
+  setIsSearchOpen: (open) => set({ isSearchOpen: open }),
+  currentSearchIndex: 0,
+  setCurrentSearchIndex: (index) => set({ currentSearchIndex: index }),
+  searchMatchCount: 0,
+  setSearchMatchCount: (count) => set({ searchMatchCount: count }),
 
   // Expanded paths (start with empty set - nodes collapsed by default)
   expandedPaths: new Set<string>(),
@@ -212,6 +244,7 @@ export const useAppStore = create<AppState>((set) => ({
     metadata: null,
     currentPath: null,
     filterQuery: '',
+    searchQuery: '',
     expandedPaths: new Set<string>(),
     error: null,
     loadingProgress: 0,
