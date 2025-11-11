@@ -1,6 +1,6 @@
-# JSONPrism
+# JSON Mapper
 
-A developer-focused JSON viewer with seamless JMESPath integration for instantly copying and sharing precise data paths.
+A developer-focused JSON viewer with seamless path mapping integration for instantly copying and sharing precise data paths.
 
 ## Features
 

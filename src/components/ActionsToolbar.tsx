@@ -1,4 +1,4 @@
-import { ChevronsDown, ChevronsUp, X, Trash2, Copy, CaseSensitive } from 'lucide-react'
+import { ChevronsDown, ChevronsUp, X, Trash2, Copy, CaseSensitive, Bookmark } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { copyToClipboard } from '@/utils/clipboard'
 import { cn } from '@/lib/utils'
@@ -20,6 +20,8 @@ export function ActionsToolbar() {
     jsonData,
     pathFormat,
     setCopyNotification,
+    bookmarks,
+    setIsBookmarksOpen,
   } = useAppStore()
 
   // For Query & Extract: get filtered data to enable/disable Copy All
@@ -113,6 +115,21 @@ export function ActionsToolbar() {
           >
             <ChevronsUp className="h-4 w-4" />
             <span>Collapse All</span>
+          </button>
+
+          {/* Bookmarks Button */}
+          <button
+            onClick={() => setIsBookmarksOpen(true)}
+            className="inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            title="View bookmarks"
+          >
+            <Bookmark className="h-4 w-4" />
+            <span>Bookmarks</span>
+            {bookmarks.length > 0 && (
+              <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
+                {bookmarks.length}
+              </span>
+            )}
           </button>
 
           {/* Filter Input */}

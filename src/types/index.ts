@@ -60,3 +60,12 @@ export interface CopyNotification {
   message: string
   visible: boolean
 }
+
+// Bookmarks
+export interface Bookmark {
+  id: string
+  path: string
+  value: JsonValue
+  pathFormat: PathFormat
+  timestamp: number
+}

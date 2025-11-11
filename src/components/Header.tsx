@@ -9,17 +9,17 @@ export function Header() {
           <FileBracesCorner className="h-7 w-7 text-primary" />
           <div className="flex flex-col">
             <h1 className="text-xl font-semibold leading-none tracking-tight">
-              JSONPrism
+              JSON Mapper
             </h1>
             <p className="text-sm text-muted-foreground">
-              JSON Viewer with JMESPath
+              JSON Viewer with Path Mapping
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <a
-            href="https://github.com/aleksAperans/json-prism"
+            href="https://github.com/aleksAperans/json-mapper"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"

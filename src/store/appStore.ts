@@ -2,8 +2,10 @@ import { create } from 'zustand'
 import type {
   JsonValue,
   PathFormat,
-  ImportHistoryItem
+  ImportHistoryItem,
+  Bookmark
 } from '@/types'
+import { loadBookmarks, saveBookmarks } from '@/utils/localStorage'
 
 interface AppState {
   // JSON data
@@ -57,6 +59,14 @@ interface AppState {
   showCopyNotification: boolean
   copyMessage: string
   setCopyNotification: (show: boolean, message?: string) => void
+
+  // Bookmarks
+  bookmarks: Bookmark[]
+  addBookmark: (path: string, value: JsonValue, pathFormat: PathFormat) => void
+  removeBookmark: (id: string) => void
+  clearBookmarks: () => void
+  isBookmarksOpen: boolean
+  setIsBookmarksOpen: (open: boolean) => void
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -146,4 +156,32 @@ export const useAppStore = create<AppState>((set) => ({
   copyMessage: '',
   setCopyNotification: (show, message = '') =>
     set({ showCopyNotification: show, copyMessage: message }),
+
+  // Bookmarks
+  bookmarks: loadBookmarks(),
+  addBookmark: (path, value, pathFormat) =>
+    set((state) => {
+      const newBookmark: Bookmark = {
+        id: crypto.randomUUID(),
+        path,
+        value,
+        pathFormat,
+        timestamp: Date.now(),
+      }
+      const newBookmarks = [...state.bookmarks, newBookmark]
+      saveBookmarks(newBookmarks)
+      return { bookmarks: newBookmarks }
+    }),
+  removeBookmark: (id) =>
+    set((state) => {
+      const newBookmarks = state.bookmarks.filter((b) => b.id !== id)
+      saveBookmarks(newBookmarks)
+      return { bookmarks: newBookmarks }
+    }),
+  clearBookmarks: () => {
+    saveBookmarks([])
+    set({ bookmarks: [] })
+  },
+  isBookmarksOpen: false,
+  setIsBookmarksOpen: (open) => set({ isBookmarksOpen: open }),
 }))

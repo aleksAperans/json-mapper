@@ -10,6 +10,7 @@ import { ActionsToolbar } from './components/ActionsToolbar'
 import { FeatureToolbar } from './components/FeatureToolbar'
 import { CopyNotification } from './components/CopyNotification'
 import { QueryExtractView } from './components/QueryExtractView'
+import { BookmarksModal } from './components/BookmarksModal'
 
 function App() {
   const { theme } = useThemeStore()
@@ -140,6 +141,7 @@ function App() {
           </div>
         </main>
         <CopyNotification />
+        <BookmarksModal />
       </div>
     </ErrorBoundary>
   )

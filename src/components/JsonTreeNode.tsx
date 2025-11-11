@@ -1,4 +1,4 @@
-import { ChevronRight, Copy } from 'lucide-react'
+import { ChevronRight, Bookmark, Copy } from 'lucide-react'
 import type { JsonValue } from '@/types'
 import { getJsonType } from '@/utils/pathGenerator'
 import { useAppStore } from '@/store/appStore'
@@ -21,7 +21,7 @@ interface JsonTreeNodeProps {
 }
 
 export function JsonTreeNode({ nodeKey, value, pathSegments, isLast = false, matchingPaths }: JsonTreeNodeProps) {
-  const { pathFormat, setCurrentPath, setCopyNotification, expandedPaths, togglePath } = useAppStore()
+  const { pathFormat, setCurrentPath, setCopyNotification, expandedPaths, togglePath, addBookmark } = useAppStore()
 
   const valueType = getJsonType(value)
   const isExpandable = valueType === 'object' || valueType === 'array'
@@ -77,6 +77,14 @@ export function JsonTreeNode({ nodeKey, value, pathSegments, isLast = false, mat
     }
   }
 
+  const handleBookmark = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const path = generatePath(currentSegments, pathFormat)
+    addBookmark(path, value, pathFormat)
+    setCopyNotification(true, `Bookmarked: ${path}`)
+    setTimeout(() => setCopyNotification(false), 2000)
+  }
+
   const handleToggle = () => {
     if (isExpandable) {
       togglePath(currentPath)
@@ -117,48 +125,56 @@ export function JsonTreeNode({ nodeKey, value, pathSegments, isLast = false, mat
   return (
     <div className="font-mono text-base">
       <div className="flex items-start hover:bg-gray-100 dark:hover:bg-gray-800 py-1 px-2 rounded group">
-        <div className="flex items-center flex-1 min-w-0">
-          {isExpandable && (
-            <button
-              onClick={handleToggle}
-              className="mr-1.5 flex-shrink-0 w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground"
-            >
-              <ChevronRight
-                className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-              />
-            </button>
-          )}
-          {!isExpandable && <span className="w-5 flex-shrink-0" />}
-
-          <span
-            className="text-json-key-light dark:text-json-key-dark cursor-pointer flex-shrink-0"
-            onClick={handleCopyPath}
-            title="Click to copy path"
+        {isExpandable && (
+          <button
+            onClick={handleToggle}
+            className="mr-1.5 flex-shrink-0 w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground"
           >
-            {isArray && !isNaN(Number(nodeKey)) ? `[${nodeKey}]` : `"${nodeKey}"`}
-          </span>
-          <span className="mx-2 text-gray-500">:</span>
+            <ChevronRight
+              className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+            />
+          </button>
+        )}
+        {!isExpandable && <span className="w-5 flex-shrink-0" />}
 
-          {!isExpandable ? (
-            <span className="flex-1 min-w-0 truncate">{renderValue()}</span>
-          ) : !isExpanded ? (
-            <span
-              className="flex-1 min-w-0 truncate text-gray-500 dark:text-gray-400 cursor-pointer"
-              onClick={handleToggle}
-            >
-              {getPreview()}
-            </span>
-          ) : (
-            <span className="text-gray-500">{isArray ? '[' : '{'}</span>
-          )}
-        </div>
+        <span
+          className="text-json-key-light dark:text-json-key-dark cursor-pointer flex-shrink-0"
+          onClick={handleCopyPath}
+          title="Click to copy path"
+        >
+          {isArray && !isNaN(Number(nodeKey)) ? `[${nodeKey}]` : `"${nodeKey}"`}
+        </span>
+        <span className="mx-2 text-gray-500">:</span>
+
+        {!isExpandable ? (
+          <span className="truncate">{renderValue()}</span>
+        ) : !isExpanded ? (
+          <span
+            className="truncate text-gray-500 dark:text-gray-400 cursor-pointer"
+            onClick={handleToggle}
+          >
+            {getPreview()}
+          </span>
+        ) : (
+          <span className="text-gray-500">{isArray ? '[' : '{'}</span>
+        )}
 
         <button
           onClick={handleCopyPath}
-          className="ml-2 opacity-0 group-hover:opacity-100 flex-shrink-0 p-1 text-muted-foreground hover:text-primary transition-opacity"
+          className="ml-2 opacity-0 group-hover:opacity-100 flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded border border-border text-xs text-muted-foreground hover:text-primary hover:border-primary transition-all"
           title="Copy path"
         >
-          <Copy className="w-4 h-4" />
+          <Copy className="w-3 h-3" />
+          <span>copy</span>
+        </button>
+
+        <button
+          onClick={handleBookmark}
+          className="ml-1 opacity-0 group-hover:opacity-100 flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded border border-border text-xs text-muted-foreground hover:text-primary hover:border-primary transition-all"
+          title="Bookmark path"
+        >
+          <Bookmark className="w-3 h-3" />
+          <span>bookmark</span>
         </button>
       </div>
 
