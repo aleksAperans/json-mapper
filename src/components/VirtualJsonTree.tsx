@@ -27,6 +27,8 @@ export function VirtualJsonTree({ data }: VirtualJsonTreeProps) {
     expandedPaths,
     togglePath,
     addBookmark,
+    removeBookmark,
+    bookmarks,
     expandSubtree,
     jsonData,
     filterQuery,
@@ -174,8 +176,20 @@ export function VirtualJsonTree({ data }: VirtualJsonTreeProps) {
   const handleBookmark = (node: FlatTreeNode, e: React.MouseEvent) => {
     e.stopPropagation()
     const path = generatePath(node.pathSegments, pathFormat)
-    addBookmark(path, node.value, pathFormat)
-    setCopyNotification(true, `Bookmarked: ${path}`)
+
+    // Check if already bookmarked
+    const existingBookmark = bookmarks.find(b => b.path === path)
+
+    if (existingBookmark) {
+      // Remove bookmark
+      removeBookmark(existingBookmark.id)
+      setCopyNotification(true, `Removed bookmark: ${path}`)
+    } else {
+      // Add bookmark
+      addBookmark(path, node.value, pathFormat)
+      setCopyNotification(true, `Bookmarked: ${path}`)
+    }
+
     setTimeout(() => setCopyNotification(false), 2000)
   }
 
@@ -219,6 +233,10 @@ export function VirtualJsonTree({ data }: VirtualJsonTreeProps) {
           const isArray = getJsonType(node.value) === 'array'
           const nodeKey = node.key
 
+          // Check if this node is bookmarked
+          const nodePath = generatePath(node.pathSegments, 'jmespath')
+          const isBookmarked = bookmarks.some(bookmark => bookmark.path === nodePath)
+
           return (
             <div
               key={virtualItem.key}
@@ -248,7 +266,11 @@ export function VirtualJsonTree({ data }: VirtualJsonTreeProps) {
                 />
               ))}
 
-              <div className="flex items-start hover:bg-gray-100 dark:hover:bg-gray-800 py-1 px-2 rounded group font-mono text-sm">
+              <div className={`flex items-start py-1 px-2 rounded group font-mono text-sm ${
+                isBookmarked
+                  ? 'bg-blue-50 dark:bg-blue-950/30 border-l-2 border-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+              }`}>
                 {node.isExpandable ? (
                   <button
                     onClick={() => handleToggle(node)}
@@ -297,10 +319,14 @@ export function VirtualJsonTree({ data }: VirtualJsonTreeProps) {
 
                 <button
                   onClick={(e) => handleBookmark(node, e)}
-                  className="ml-1 opacity-0 group-hover:opacity-100 flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded border border-border text-xs text-muted-foreground hover:text-primary hover:border-primary transition-all"
-                  title="Bookmark path"
+                  className={`ml-1 flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded border text-xs transition-all ${
+                    isBookmarked
+                      ? 'opacity-100 text-blue-600 border-blue-600'
+                      : 'opacity-0 group-hover:opacity-100 border-border text-muted-foreground hover:text-primary hover:border-primary'
+                  }`}
+                  title={isBookmarked ? 'Remove bookmark' : 'Bookmark path'}
                 >
-                  <Bookmark className="w-3 h-3" />
+                  <Bookmark className={`w-3 h-3 ${isBookmarked ? 'fill-blue-600' : ''}`} />
                   <span>bookmark</span>
                 </button>
 
