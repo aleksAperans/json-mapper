@@ -185,7 +185,7 @@ export function TextView() {
 
           if (!isExpanded) {
             // Collapsed array
-            const content = `${keyPrefix}[ ... ] Array[${value.length}]`
+            const content = `${keyPrefix}[ ... ]`
             totalSearchMatches += countMatches(content)
             result.push({
               lineNumber: lineNumber++,
@@ -198,7 +198,7 @@ export function TextView() {
             })
           } else {
             // Expanded array
-            const content = `${keyPrefix}[ Array[${value.length}]`
+            const content = `${keyPrefix}[`
             totalSearchMatches += countMatches(content)
             result.push({
               lineNumber: lineNumber++,
@@ -239,7 +239,7 @@ export function TextView() {
 
         if (!isExpanded) {
           // Collapsed object
-          const content = `${keyPrefix}{ ... } Object{${entries.length}}`
+          const content = `${keyPrefix}{ ... }`
           totalSearchMatches += countMatches(content)
           result.push({
             lineNumber: lineNumber++,
@@ -264,7 +264,7 @@ export function TextView() {
           })
         } else {
           // Expanded object
-          const content = `${keyPrefix}{ Object{${entries.length}}`
+          const content = `${keyPrefix}{`
           totalSearchMatches += countMatches(content)
           result.push({
             lineNumber: lineNumber++,

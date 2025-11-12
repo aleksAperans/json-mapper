@@ -1,6 +1,7 @@
 import { Download, Trash2, FileDown, Copy } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
-import { generateCSV, generateMarkdownTable, downloadFile } from '@/utils/bookmarkExport'
+import { generateCSV, generateMarkdownTable } from '@/utils/bookmarkExport'
+import { downloadFile } from '@/utils/exportUtils'
 import { BookmarksTable } from '@/components/BookmarksTable'
 import {
   Dialog,

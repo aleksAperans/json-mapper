@@ -10,7 +10,7 @@ const features = [
   },
   {
     id: 'query' as const,
-    label: 'Explore',
+    label: 'Analyze',
     icon: Search,
   },
   {

@@ -15,7 +15,7 @@ export function Header() {
               JSON Mapper
             </h1>
             <p className="text-sm text-muted-foreground">
-              Explore, navigate, and map from nested JSON structures
+              View, analyze and convert JSON - built for deeply nested structures
             </p>
           </div>
         </div>

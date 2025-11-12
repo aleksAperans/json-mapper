@@ -1,10 +1,11 @@
-import { ChevronsDown, ChevronsUp, X, Trash2, Copy, CaseSensitive, Bookmark, EyeOff, Filter, Search, ChevronLeft, ChevronRight, WrapText, Braces, Network, Route, Key, FileJson } from 'lucide-react'
+import { ChevronsDown, ChevronsUp, X, Trash2, Copy, CaseSensitive, Bookmark, EyeOff, Filter, Search, ChevronLeft, ChevronRight, WrapText, Braces, Network, Route, Key, FileJson, Download } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { copyToClipboard } from '@/utils/clipboard'
 import { cn } from '@/lib/utils'
 import { useMemo, useState, useEffect } from 'react'
 import { extractAllPaths, extractAllKeys, extractAllValues } from '@/utils/extract'
 import { findSearchMatches } from '@/utils/searchMatches'
+import { generatePathsCsv, generateKeysCsv, generateValuesCsv, downloadFile } from '@/utils/exportUtils'
 
 export function ActionsToolbar() {
   const {
@@ -214,6 +215,30 @@ export function ActionsToolbar() {
     }
   }
 
+  const handleDownloadCsv = () => {
+    if (!extractedData) return
+
+    let csvContent = ''
+    let filename = ''
+
+    switch (extractionMode) {
+      case 'paths':
+        csvContent = generatePathsCsv(extractedData as ReturnType<typeof extractAllPaths>)
+        filename = 'json-paths.csv'
+        break
+      case 'keys':
+        csvContent = generateKeysCsv(extractedData as ReturnType<typeof extractAllKeys>)
+        filename = 'json-keys.csv'
+        break
+      case 'values':
+        csvContent = generateValuesCsv(extractedData as ReturnType<typeof extractAllValues>)
+        filename = 'json-values.csv'
+        break
+    }
+
+    downloadFile(csvContent, filename, 'text/csv;charset=utf-8;')
+  }
+
   return (
     <>
       {/* Main Toolbar */}
@@ -344,6 +369,16 @@ export function ActionsToolbar() {
             >
               <Copy className="h-3.5 w-3.5 flex-shrink-0" />
               <span className="hidden lg:inline">Copy All</span>
+            </button>
+
+            <button
+              onClick={handleDownloadCsv}
+              disabled={!extractedData || extractedData.length === 0}
+              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
+              title="Download as CSV"
+            >
+              <Download className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className="hidden lg:inline">Download</span>
             </button>
           </>
         ) : null}
