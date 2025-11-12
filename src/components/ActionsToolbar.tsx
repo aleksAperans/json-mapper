@@ -12,8 +12,6 @@ export function ActionsToolbar() {
     activeFeature,
     viewerMode,
     setViewerMode,
-    expandAll,
-    collapseAll,
     incrementExpandDepth,
     decrementExpandDepth,
     expandToMaxDepth,
@@ -50,9 +48,6 @@ export function ActionsToolbar() {
     searchMatchCount,
     setSearchMatchCount,
   } = useAppStore()
-
-  // For large files, "Expand All" will use depth-limited expansion
-  const isLargeFile = metadata?.nodeCount && metadata.nodeCount > 5000
 
   // Local state for filter input (debounced to reduce latency)
   const [filterInputValue, setFilterInputValue] = useState(filterQuery)
