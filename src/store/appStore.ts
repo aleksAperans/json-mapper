@@ -5,7 +5,7 @@ import type {
   ImportHistoryItem,
   Bookmark
 } from '@/types'
-import { loadBookmarks, saveBookmarks } from '@/utils/localStorage'
+import { loadBookmarks, saveBookmarks, isFirstTimeUser, markUserAsVisited as markUserAsVisitedLS } from '@/utils/localStorage'
 import { getJsonType } from '@/utils/pathGenerator'
 
 interface AppState {
@@ -129,6 +129,10 @@ interface AppState {
   // About Modal
   isAboutOpen: boolean
   setIsAboutOpen: (open: boolean) => void
+
+  // First-time user tracking
+  isFirstTimeUser: boolean
+  markAsVisited: () => void
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -456,4 +460,11 @@ export const useAppStore = create<AppState>((set) => ({
   // About Modal
   isAboutOpen: false,
   setIsAboutOpen: (open) => set({ isAboutOpen: open }),
+
+  // First-time user tracking
+  isFirstTimeUser: isFirstTimeUser(),
+  markAsVisited: () => {
+    markUserAsVisitedLS()
+    set({ isFirstTimeUser: false })
+  },
 }))

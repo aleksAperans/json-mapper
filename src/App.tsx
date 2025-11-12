@@ -117,7 +117,9 @@ function App() {
     isShortcutsOpen,
     setIsShortcutsOpen,
     isAboutOpen,
-    setIsAboutOpen
+    setIsAboutOpen,
+    isFirstTimeUser,
+    markAsVisited
   } = useAppStore()
 
   // Initialize keyboard shortcuts
@@ -150,6 +152,7 @@ function App() {
         setFileSize(result.size)
         setMetadata(result.metadata)
         addToHistory({ source: 'file', name: file.name })
+        markAsVisited() // Mark user as visited after successful load
       } catch (error) {
         console.error('Failed to parse JSON:', error)
         const errorMsg = error instanceof Error ? error.message : 'Invalid JSON file'
@@ -159,7 +162,7 @@ function App() {
         setLoadingProgress(0, '')
       }
     },
-    [setJsonData, setOriginalText, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError]
+    [setJsonData, setOriginalText, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError, markAsVisited]
   )
 
   // Handle paste from clipboard
@@ -179,6 +182,7 @@ function App() {
       setFileSize(result.size)
       setMetadata(result.metadata)
       addToHistory({ source: 'clipboard' })
+      markAsVisited() // Mark user as visited after successful load
     } catch (error) {
       console.error('Failed to parse JSON from clipboard:', error)
       const errorMsg = error instanceof Error ? error.message : 'Invalid JSON in clipboard or clipboard access denied'
@@ -187,7 +191,7 @@ function App() {
       setIsLoading(false)
       setLoadingProgress(0, '')
     }
-  }, [setJsonData, setOriginalText, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError])
+  }, [setJsonData, setOriginalText, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError, markAsVisited])
 
   // Handle load example
   const handleLoadExample = useCallback(async () => {
@@ -206,6 +210,7 @@ function App() {
       setFileSize(result.size)
       setMetadata(result.metadata)
       addToHistory({ source: 'file', name: 'example.json' })
+      markAsVisited() // Mark user as visited after successful load
     } catch (error) {
       console.error('Failed to load example JSON:', error)
       const errorMsg = error instanceof Error ? error.message : 'Failed to load example'
@@ -214,7 +219,7 @@ function App() {
       setIsLoading(false)
       setLoadingProgress(0, '')
     }
-  }, [setJsonData, setOriginalText, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError])
+  }, [setJsonData, setOriginalText, setFileSize, setMetadata, addToHistory, setIsLoading, setLoadingProgress, setError, markAsVisited])
 
   return (
     <ErrorBoundary>
@@ -267,6 +272,7 @@ function App() {
               onPasteFromClipboard={handlePasteFromClipboard}
               onFileUpload={handleFileUpload}
               onLoadExample={handleLoadExample}
+              isFirstTimeUser={isFirstTimeUser}
             />
           ) : activeFeature === 'viewer' ? (
             viewerMode === 'tree' ? (
