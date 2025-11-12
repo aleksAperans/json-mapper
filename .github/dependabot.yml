@@ -5,6 +5,18 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # Ignore major version updates for React types until we upgrade to React 19
+    ignore:
+      - dependency-name: "@types/react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
     # Group all minor and patch updates together
     groups:
       development-dependencies:
