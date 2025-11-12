@@ -1,4 +1,4 @@
-import { Github, FileBracesCorner, Info } from 'lucide-react'
+import { Github, Info } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { useAppStore } from '@/store/appStore'
 
@@ -9,7 +9,7 @@ export function Header() {
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-4">
-          <FileBracesCorner className="h-7 w-7 text-primary" />
+          <img src="/android-chrome-192x192.png" alt="JSON Mapper" className="h-7 w-7 rounded" />
           <div className="flex flex-col gap-0.5">
             <h1 className="text-xl font-semibold leading-none tracking-tight">
               JSON Mapper

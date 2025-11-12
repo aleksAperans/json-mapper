@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" fill="none">
+  <!-- Left curly brace -->
+  <path d="M10 10 Q7 10 7 13 L7 14 Q7 16 5 16 Q7 16 7 18 L7 19 Q7 22 10 22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Right curly brace -->
+  <path d="M22 10 Q25 10 25 13 L25 14 Q25 16 27 16 Q25 16 25 18 L25 19 Q25 22 22 22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Connection dots -->
+  <circle cx="13" cy="12" r="1.5" fill="currentColor"/>
+  <circle cx="16" cy="16" r="1.5" fill="currentColor"/>
+  <circle cx="19" cy="20" r="1.5" fill="currentColor"/>
+  
+  <!-- Connecting lines -->
+  <path d="M13 12 L16 16 L19 20" stroke="currentColor" stroke-width="1" fill="none" opacity="0.5"/>
+</svg>
