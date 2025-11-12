@@ -1,0 +1,28 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Group all minor and patch updates together
+    groups:
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+    # Limit number of open pull requests
+    open-pull-requests-limit: 5
+    # Assign reviewers (optional - update with your GitHub username if desired)
+    reviewers:
+      - "aleksAperans"
+    # Add labels to PRs
+    labels:
+      - "dependencies"
+      - "automated"
