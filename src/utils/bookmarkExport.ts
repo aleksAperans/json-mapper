@@ -1,5 +1,4 @@
 import type { Bookmark, JsonValue } from '@/types'
-import { downloadFile } from './exportUtils'
 
 /**
  * Formats a JSON value for display in table/export
