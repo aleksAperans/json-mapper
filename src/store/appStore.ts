@@ -89,10 +89,15 @@ interface AppState {
   // By default, nodes are collapsed unless they're in this set or at root level
   expandedPaths: Set<string>
   collapsedPaths: Set<string> // Tracks explicitly collapsed paths when in Expand All mode
+  currentExpandDepth: number // Current expansion depth (0 = all collapsed)
   togglePath: (path: string) => void
   expandAll: () => void
   collapseAll: () => void
   expandSubtree: (parentPath: string, data: JsonValue) => void
+  incrementExpandDepth: () => void // Expand one level deeper
+  decrementExpandDepth: () => void // Collapse one level
+  expandToMaxDepth: () => void // Expand to maximum depth
+  collapseToMinDepth: () => void // Collapse to depth 0
 
   // Clear data
   clearJsonData: () => void
@@ -203,23 +208,42 @@ export const useAppStore = create<AppState>((set) => ({
   // Expanded paths (start with empty set - nodes collapsed by default)
   expandedPaths: new Set<string>(),
   collapsedPaths: new Set<string>(),
+  currentExpandDepth: 0,
   togglePath: (path) =>
     set((state) => {
       const newExpandedSet = new Set(state.expandedPaths)
       const newCollapsedSet = new Set(state.collapsedPaths)
 
-      // If we're in "expand all" or "expand to depth" mode, use collapsed paths tracking
-      if (newExpandedSet.has('__EXPAND_ALL__') || newExpandedSet.has('__EXPAND_TO_DEPTH_2__')) {
-        // Toggle in the collapsed set instead
+      // Check if we're in depth-based mode (including depth 0)
+      const depthFlag = Array.from(newExpandedSet).find(flag => flag.startsWith('__EXPAND_TO_DEPTH_'))
+      const isDepthMode = depthFlag || state.currentExpandDepth === 0
+
+      if (isDepthMode) {
+        // In depth mode, use collapsed/expanded paths for overrides
         if (newCollapsedSet.has(path)) {
-          newCollapsedSet.delete(path) // Un-collapse (expand)
+          // Was explicitly collapsed, now expand it
+          newCollapsedSet.delete(path)
+          newExpandedSet.add(path) // Also add to expanded for depth 0
+        } else if (newExpandedSet.has(path) && !depthFlag) {
+          // Was explicitly expanded (depth 0), now collapse it
+          newExpandedSet.delete(path)
         } else {
-          newCollapsedSet.add(path) // Collapse this specific path
+          // Check current state based on depth
+          const pathDepth = path.split(/[.\[\]]/).filter(Boolean).length
+          const currentDepth = depthFlag ? parseInt(depthFlag.replace('__EXPAND_TO_DEPTH_', '').replace('__', '')) : 0
+
+          if (pathDepth <= currentDepth) {
+            // Currently expanded by depth, collapse it explicitly
+            newCollapsedSet.add(path)
+          } else {
+            // Currently collapsed, expand it explicitly
+            newExpandedSet.add(path)
+          }
         }
         return { expandedPaths: newExpandedSet, collapsedPaths: newCollapsedSet }
       }
 
-      // Normal mode: toggle in expanded set
+      // Normal mode: toggle in expanded set (shouldn't happen with new system, but keep for safety)
       if (newExpandedSet.has(path)) {
         // Path is expanded, collapse it
         newExpandedSet.delete(path)
@@ -233,18 +257,71 @@ export const useAppStore = create<AppState>((set) => ({
   expandAll: () => set((state) => {
     // For large files, use depth-limited expansion instead of full expansion
     const isLargeFile = state.metadata?.nodeCount && state.metadata.nodeCount > 5000
+    const maxDepth = state.metadata?.maxDepth || 999
     if (isLargeFile) {
-      return { expandedPaths: new Set<string>(['__EXPAND_TO_DEPTH_2__']), collapsedPaths: new Set() }
+      return {
+        expandedPaths: new Set<string>(['__EXPAND_TO_DEPTH_2__']),
+        collapsedPaths: new Set(),
+        currentExpandDepth: 2
+      }
     }
-    return { expandedPaths: new Set<string>(['__EXPAND_ALL__']), collapsedPaths: new Set() }
+    return {
+      expandedPaths: new Set<string>([`__EXPAND_TO_DEPTH_${maxDepth}__`]),
+      collapsedPaths: new Set(),
+      currentExpandDepth: maxDepth
+    }
   }),
-  collapseAll: () => set({ expandedPaths: new Set<string>(), collapsedPaths: new Set() }),
+  collapseAll: () => set({
+    expandedPaths: new Set<string>(),
+    collapsedPaths: new Set(),
+    currentExpandDepth: 0
+  }),
+  incrementExpandDepth: () => set((state) => {
+    const maxDepth = state.metadata?.maxDepth || 999
+    const newDepth = Math.min(state.currentExpandDepth + 1, maxDepth)
+    return {
+      expandedPaths: new Set<string>([`__EXPAND_TO_DEPTH_${newDepth}__`]),
+      collapsedPaths: new Set(),
+      currentExpandDepth: newDepth
+    }
+  }),
+  decrementExpandDepth: () => set((state) => {
+    const newDepth = Math.max(state.currentExpandDepth - 1, 0)
+    if (newDepth === 0) {
+      return {
+        expandedPaths: new Set<string>(),
+        collapsedPaths: new Set(),
+        currentExpandDepth: 0
+      }
+    }
+    return {
+      expandedPaths: new Set<string>([`__EXPAND_TO_DEPTH_${newDepth}__`]),
+      collapsedPaths: new Set(),
+      currentExpandDepth: newDepth
+    }
+  }),
+  expandToMaxDepth: () => set((state) => {
+    const maxDepth = state.metadata?.maxDepth || 999
+    return {
+      expandedPaths: new Set<string>([`__EXPAND_TO_DEPTH_${maxDepth}__`]),
+      collapsedPaths: new Set(),
+      currentExpandDepth: maxDepth
+    }
+  }),
+  collapseToMinDepth: () => set({
+    expandedPaths: new Set<string>(),
+    collapsedPaths: new Set(),
+    currentExpandDepth: 0
+  }),
   expandSubtree: (parentPath: string, data: JsonValue) => set((state) => {
     // Recursively expand all children under a specific parent path
     const newPaths = new Set(state.expandedPaths)
-    // Remove expand all flags if present
-    newPaths.delete('__EXPAND_ALL__')
-    newPaths.delete('__EXPAND_TO_DEPTH_4__')
+    // Remove expand depth flags if present
+    Array.from(newPaths).forEach(flag => {
+      if (flag.startsWith('__EXPAND_TO_DEPTH_')) {
+        newPaths.delete(flag)
+      }
+    })
 
     // Add the parent path itself
     newPaths.add(parentPath)
@@ -296,6 +373,7 @@ export const useAppStore = create<AppState>((set) => ({
     searchQuery: '',
     expandedPaths: new Set<string>(),
     collapsedPaths: new Set<string>(),
+    currentExpandDepth: 0,
     error: null,
     loadingProgress: 0,
     loadingMessage: ''

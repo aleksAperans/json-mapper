@@ -90,19 +90,24 @@ export function JsonTreeNode({
 
   // Determine if this node should be expanded
   // - If explicitly collapsed, always collapse (overrides everything)
-  // - If __EXPAND_ALL__ is active, expand everything
-  // - If __EXPAND_TO_DEPTH_2__ is active, expand up to depth 2
+  // - If explicitly expanded (individual path), always expand (overrides depth)
+  // - If __EXPAND_TO_DEPTH_N__ is active, expand up to depth N
   // - If filter is active and node is on path to match, auto-expand
-  // - Otherwise, only expanded if explicitly in expandedPaths
+  // - Otherwise, collapsed by default
+
+  // Check for depth-based expansion flag
+  const depthFlag = Array.from(expandedPaths).find(flag => flag.startsWith('__EXPAND_TO_DEPTH_'))
+  const expandToDepth = depthFlag ? parseInt(depthFlag.replace('__EXPAND_TO_DEPTH_', '').replace('__', '')) : 0
+
   const isExpanded = collapsedPaths.has(currentPath)
-    ? false // Explicitly collapsed in Expand All mode
-    : expandedPaths.has('__EXPAND_ALL__')
-      ? true // Expand all mode
-      : expandedPaths.has('__EXPAND_TO_DEPTH_2__') && pathDepth <= 2
-        ? true // Depth-limited expansion for large files
+    ? false // Explicitly collapsed
+    : expandedPaths.has(currentPath) && currentPath !== depthFlag
+      ? true // Explicitly expanded (individual path toggle)
+      : pathDepth <= expandToDepth
+        ? true // Depth-based expansion
         : matchingPaths.size > 0 && isOnPathToMatch
           ? true // Auto-expand when filtering to show matches
-          : expandedPaths.has(currentPath) // Progressive disclosure
+          : false // Default collapsed
 
   // Helper function to get child entries
   const getChildEntries = (): [string, JsonValue][] => {
@@ -348,7 +353,7 @@ export function JsonTreeNode({
         <button
           onClick={handleBookmark}
           className={`ml-1 ${
-            isBookmarked ? 'opacity-100 text-blue-600 border-blue-600' : 'opacity-0 group-hover:opacity-100'
+            isBookmarked ? 'opacity-100 text-blue-600 border-blue-600' : 'opacity-0 group-hover:opacity-100 text-muted-foreground'
           } flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded border border-border text-xs hover:text-primary hover:border-primary transition-all`}
           title={isBookmarked ? 'Remove bookmark' : 'Bookmark path'}
         >

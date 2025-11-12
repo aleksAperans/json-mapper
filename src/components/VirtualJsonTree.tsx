@@ -25,6 +25,7 @@ export function VirtualJsonTree({ data }: VirtualJsonTreeProps) {
     setCurrentPath,
     setCopyNotification,
     expandedPaths,
+    collapsedPaths,
     togglePath,
     addBookmark,
     removeBookmark,
@@ -54,11 +55,12 @@ export function VirtualJsonTree({ data }: VirtualJsonTreeProps) {
   const flatNodes = useMemo(() => {
     return flattenTree(data, {
       expandedPaths,
+      collapsedPaths,
       matchingPaths,
       emptyPaths,
       hideEmpty
     })
-  }, [data, expandedPaths, matchingPaths, emptyPaths, hideEmpty])
+  }, [data, expandedPaths, collapsedPaths, matchingPaths, emptyPaths, hideEmpty])
 
   // Helper function to highlight search matches in text
   const highlightText = (text: string, className: string, matchType: 'key' | 'value' = 'value') => {

@@ -18,7 +18,7 @@ const formats: { value: PathFormat; label: string }[] = [
 ]
 
 export function Footer() {
-  const { fileSize, metadata, hoverPosition, pathFormat, setPathFormat, hoverPath, currentPath, setIsShortcutsOpen } = useAppStore()
+  const { fileSize, metadata, hoverPosition, pathFormat, setPathFormat, hoverPath, currentPath, setIsShortcutsOpen, currentExpandDepth } = useAppStore()
 
   return (
     <footer className="border-t bg-muted/40 px-4 py-2">
@@ -40,7 +40,7 @@ export function Footer() {
 
           {metadata?.maxDepth !== undefined && (
             <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-              <span>Max depth: {metadata.maxDepth}</span>
+              <span>Depth: {currentExpandDepth}/{metadata.maxDepth}</span>
             </div>
           )}
         </div>

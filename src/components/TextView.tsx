@@ -75,8 +75,17 @@ export function TextView() {
 
     // Check if a path should be expanded
     const isPathExpanded = (path: string): boolean => {
-      // If explicitly collapsed (in Expand All mode), it should be collapsed
+      // If explicitly collapsed, it should be collapsed
       if (collapsedPaths.has(path)) return false
+
+      // Check for depth-based expansion flag
+      const depthFlag = Array.from(expandedPaths).find(flag => flag.startsWith('__EXPAND_TO_DEPTH_'))
+      const expandToDepth = depthFlag ? parseInt(depthFlag.replace('__EXPAND_TO_DEPTH_', '').replace('__', '')) : 0
+
+      // If explicitly expanded (individual path toggle), always expand
+      if (expandedPaths.has(path) && path !== depthFlag) {
+        return true
+      }
 
       // Auto-expand paths that contain filter matches
       if (matchingPaths.size > 0) {
@@ -88,12 +97,9 @@ export function TextView() {
         }
       }
 
-      if (expandedPaths.has('__EXPAND_ALL__')) return true
-      if (expandedPaths.has('__EXPAND_TO_DEPTH_2__')) {
-        const depth = path.split(/[.\[\]]/).filter(Boolean).length
-        return depth <= 2
-      }
-      return expandedPaths.has(path)
+      // Check depth-based expansion
+      const depth = path.split(/[.\[\]]/).filter(Boolean).length
+      return depth <= expandToDepth
     }
 
     // Check if a line should be shown based on filter

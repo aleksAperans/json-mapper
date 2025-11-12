@@ -28,8 +28,10 @@ const shortcuts: Shortcut[] = [
   // Viewer
   { keys: ['⌘', '1'], description: 'Switch to Tree view', category: 'viewer' },
   { keys: ['⌘', '2'], description: 'Switch to JSON view', category: 'viewer' },
-  { keys: ['⌘', 'E'], description: 'Expand all nodes', category: 'viewer' },
-  { keys: ['⌘', '⇧', 'E'], description: 'Collapse all nodes', category: 'viewer' },
+  { keys: ['⌘', 'E'], description: 'Expand one level deeper', category: 'viewer' },
+  { keys: ['⌘', '⇧', 'E'], description: 'Collapse one level', category: 'viewer' },
+  { keys: ['⌘', '⌥', 'E'], description: 'Expand to maximum depth', category: 'viewer' },
+  { keys: ['⌘', '⌥', '⇧', 'E'], description: 'Collapse all nodes', category: 'viewer' },
 
   // Navigation
   { keys: ['⌘', 'G'], description: 'Next search result', category: 'navigation' },

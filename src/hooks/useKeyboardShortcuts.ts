@@ -10,6 +10,10 @@ export function useKeyboardShortcuts() {
     setViewerMode,
     expandAll,
     collapseAll,
+    incrementExpandDepth,
+    decrementExpandDepth,
+    expandToMaxDepth,
+    collapseToMinDepth,
     activeFeature,
     isSearchOpen,
     searchMatchCount,
@@ -71,17 +75,31 @@ export function useKeyboardShortcuts() {
         return
       }
 
-      // Cmd/Ctrl + E - Expand all
-      if ((e.metaKey || e.ctrlKey) && e.key === 'e' && !e.shiftKey && activeFeature === 'viewer') {
+      // Cmd/Ctrl + E - Expand one level (light)
+      if ((e.metaKey || e.ctrlKey) && e.key === 'e' && !e.shiftKey && !e.altKey && activeFeature === 'viewer') {
         e.preventDefault()
-        expandAll()
+        incrementExpandDepth()
         return
       }
 
-      // Cmd/Ctrl + Shift + E - Collapse all
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'E' && activeFeature === 'viewer') {
+      // Cmd/Ctrl + Shift + E - Collapse one level (light)
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'E' && !e.altKey && activeFeature === 'viewer') {
         e.preventDefault()
-        collapseAll()
+        decrementExpandDepth()
+        return
+      }
+
+      // Cmd/Ctrl + Alt + E - Expand to max depth (full)
+      if ((e.metaKey || e.ctrlKey) && e.altKey && e.key === 'e' && !e.shiftKey && activeFeature === 'viewer') {
+        e.preventDefault()
+        expandToMaxDepth()
+        return
+      }
+
+      // Cmd/Ctrl + Alt + Shift + E - Collapse all (full)
+      if ((e.metaKey || e.ctrlKey) && e.altKey && e.shiftKey && e.key === 'E' && activeFeature === 'viewer') {
+        e.preventDefault()
+        collapseToMinDepth()
         return
       }
 

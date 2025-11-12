@@ -1,4 +1,4 @@
-import { ChevronsDown, ChevronsUp, X, Trash2, Copy, CaseSensitive, Bookmark, EyeOff, Filter, Search, ChevronLeft, ChevronRight, WrapText, Braces, Network, Route, Key, FileJson, Download } from 'lucide-react'
+import { ChevronsDown, ChevronsUp, ChevronDown, ChevronUp, X, Trash2, Copy, CaseSensitive, Bookmark, BookmarkX, EyeOff, Filter, Search, ChevronLeft, ChevronRight, WrapText, Braces, Network, Route, Key, FileJson, Download } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { copyToClipboard } from '@/utils/clipboard'
 import { cn } from '@/lib/utils'
@@ -14,6 +14,11 @@ export function ActionsToolbar() {
     setViewerMode,
     expandAll,
     collapseAll,
+    incrementExpandDepth,
+    decrementExpandDepth,
+    expandToMaxDepth,
+    collapseToMinDepth,
+    currentExpandDepth,
     clearJsonData,
     extractionMode,
     setExtractionMode,
@@ -30,6 +35,7 @@ export function ActionsToolbar() {
     pathFormat,
     setCopyNotification,
     bookmarks,
+    clearBookmarks,
     setIsBookmarksOpen,
     isFilterOpen,
     setIsFilterOpen,
@@ -281,25 +287,45 @@ export function ActionsToolbar() {
             {/* Tree and JSON View Actions (show for tree and json modes) */}
             {(viewerMode === 'tree' || viewerMode === 'json') && (
               <>
+                {/* Expand Light Button */}
                 <button
-              onClick={expandAll}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              title={
-                isLargeFile
-                  ? `Expand to depth 2 (large file: ${metadata?.nodeCount?.toLocaleString()} nodes)`
-                  : "Expand all nodes"
-              }
-            >
-              <ChevronsDown className="h-4 w-4" />
-            </button>
+                  onClick={incrementExpandDepth}
+                  disabled={currentExpandDepth >= (metadata?.maxDepth || 999)}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Expand one level deeper"
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </button>
 
-            <button
-              onClick={collapseAll}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              title="Collapse all nodes"
-            >
-              <ChevronsUp className="h-4 w-4" />
-            </button>
+                {/* Expand Full Button */}
+                <button
+                  onClick={expandToMaxDepth}
+                  disabled={currentExpandDepth >= (metadata?.maxDepth || 999)}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Expand to maximum depth"
+                >
+                  <ChevronsDown className="h-4 w-4" />
+                </button>
+
+                {/* Collapse Light Button */}
+                <button
+                  onClick={decrementExpandDepth}
+                  disabled={currentExpandDepth <= 0}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Collapse one level"
+                >
+                  <ChevronUp className="h-4 w-4" />
+                </button>
+
+                {/* Collapse Full Button */}
+                <button
+                  onClick={collapseToMinDepth}
+                  disabled={currentExpandDepth <= 0}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Collapse all nodes"
+                >
+                  <ChevronsUp className="h-4 w-4" />
+                </button>
 
             {/* Hide Empty Button */}
             <button
@@ -399,6 +425,23 @@ export function ActionsToolbar() {
                 {bookmarks.length}
               </span>
             )}
+          </button>
+        )}
+
+        {/* Clear Bookmarks Button - Only show when bookmarks exist */}
+        {activeFeature === 'viewer' && bookmarks.length > 0 && (
+          <button
+            onClick={() => {
+              if (confirm('Are you sure you want to clear all bookmarks?')) {
+                clearBookmarks()
+                setCopyNotification(true, 'All bookmarks cleared')
+                setTimeout(() => setCopyNotification(false), 2000)
+              }
+            }}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-sm font-medium text-destructive shadow-sm transition-colors hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            title="Clear all bookmarks"
+          >
+            <BookmarkX className="h-4 w-4" />
           </button>
         )}
 

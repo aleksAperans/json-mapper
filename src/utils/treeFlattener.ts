@@ -26,6 +26,7 @@ export interface FlatTreeNode {
 
 interface FlattenOptions {
   expandedPaths: Set<string>
+  collapsedPaths?: Set<string>
   matchingPaths?: Set<string>
   emptyPaths?: Set<string>
   hideEmpty?: boolean
@@ -40,10 +41,11 @@ export function flattenTree(
   options: FlattenOptions
 ): FlatTreeNode[] {
   const flatNodes: FlatTreeNode[] = []
-  const { expandedPaths, matchingPaths, emptyPaths, hideEmpty, maxDepth } = options
+  const { expandedPaths, matchingPaths, emptyPaths, hideEmpty, maxDepth, collapsedPaths } = options
 
-  const expandAll = expandedPaths.has('__EXPAND_ALL__')
-  const expandToDepth2 = expandedPaths.has('__EXPAND_TO_DEPTH_2__')
+  // Check for depth-based expansion flag
+  const depthFlag = Array.from(expandedPaths).find(flag => flag.startsWith('__EXPAND_TO_DEPTH_'))
+  const expandToDepth = depthFlag ? parseInt(depthFlag.replace('__EXPAND_TO_DEPTH_', '').replace('__', '')) : 0
 
   function buildPath(segments: PathSegment[]): string {
     if (segments.length === 0) return ''
@@ -135,10 +137,16 @@ export function flattenTree(
         : 0
 
       // Determine if this node should be expanded
-      const shouldExpand = expandAll ||
-        (expandToDepth2 && depth <= 2) ||
-        (matchingPaths && matchingPaths.size > 0 && isOnPathToMatch(childPath)) ||
-        expandedPaths.has(childPath)
+      // Priority: explicitly collapsed > explicitly expanded > depth-based > filter-based
+      const shouldExpand = collapsedPaths && collapsedPaths.has(childPath)
+        ? false // Explicitly collapsed
+        : expandedPaths.has(childPath) && childPath !== depthFlag
+          ? true // Explicitly expanded
+          : depth <= expandToDepth
+            ? true // Depth-based expansion
+            : matchingPaths && matchingPaths.size > 0 && isOnPathToMatch(childPath)
+              ? true // Filter-based expansion
+              : false // Default collapsed
 
       // Add node to flat list
       flatNodes.push({
