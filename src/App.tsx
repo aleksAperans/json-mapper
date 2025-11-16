@@ -272,6 +272,7 @@ function App() {
               onPasteFromClipboard={handlePasteFromClipboard}
               onFileUpload={handleFileUpload}
               onLoadExample={handleLoadExample}
+              onShowShortcuts={() => setIsShortcutsOpen(true)}
               isFirstTimeUser={isFirstTimeUser}
             />
           ) : activeFeature === 'viewer' ? (

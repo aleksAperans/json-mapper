@@ -3,9 +3,10 @@ import type {
   JsonValue,
   PathFormat,
   ImportHistoryItem,
-  Bookmark
+  Bookmark,
+  CustomColumn
 } from '@/types'
-import { loadBookmarks, saveBookmarks, isFirstTimeUser, markUserAsVisited as markUserAsVisitedLS } from '@/utils/localStorage'
+import { loadBookmarks, saveBookmarks, isFirstTimeUser, markUserAsVisited as markUserAsVisitedLS, loadCustomColumns, saveCustomColumns, loadColumnOrder, saveColumnOrder } from '@/utils/localStorage'
 import { getJsonType } from '@/utils/pathGenerator'
 
 interface AppState {
@@ -121,6 +122,17 @@ interface AppState {
   clearBookmarks: () => void
   isBookmarksOpen: boolean
   setIsBookmarksOpen: (open: boolean) => void
+
+  // Custom columns for bookmarks
+  customColumns: CustomColumn[]
+  addCustomColumn: (name: string) => void
+  removeCustomColumn: (id: string) => void
+  renameCustomColumn: (id: string, newName: string) => void
+  reorderCustomColumns: (startIndex: number, endIndex: number) => void
+
+  // Column order for bookmarks table (includes both base and custom columns)
+  columnOrder: string[]
+  reorderColumns: (startId: string, endId: string) => void
 
   // Keyboard Shortcuts
   isShortcutsOpen: boolean
@@ -417,8 +429,8 @@ export const useAppStore = create<AppState>((set) => ({
         timestamp: Date.now(),
         type,
         targetPath: '',
-        transformation: '',
         notes: '',
+        customColumns: {},
       }
       const newBookmarks = [...state.bookmarks, newBookmark]
       saveBookmarks(newBookmarks)
@@ -452,6 +464,79 @@ export const useAppStore = create<AppState>((set) => ({
   },
   isBookmarksOpen: false,
   setIsBookmarksOpen: (open) => set({ isBookmarksOpen: open }),
+
+  // Custom columns
+  customColumns: loadCustomColumns(),
+  addCustomColumn: (name) =>
+    set((state) => {
+      const newColumn: CustomColumn = {
+        id: crypto.randomUUID(),
+        name,
+      }
+      const newColumns = [...state.customColumns, newColumn]
+      const newOrder = [...state.columnOrder, newColumn.id]
+      saveCustomColumns(newColumns)
+      saveColumnOrder(newOrder)
+      return { customColumns: newColumns, columnOrder: newOrder }
+    }),
+  removeCustomColumn: (id) =>
+    set((state) => {
+      const newColumns = state.customColumns.filter((col) => col.id !== id)
+      const newOrder = state.columnOrder.filter((colId) => colId !== id)
+      // Also remove the column data from all bookmarks
+      const newBookmarks = state.bookmarks.map((bookmark) => {
+        const { [id]: _, ...remainingColumns } = bookmark.customColumns
+        return { ...bookmark, customColumns: remainingColumns }
+      })
+      saveCustomColumns(newColumns)
+      saveColumnOrder(newOrder)
+      saveBookmarks(newBookmarks)
+      return { customColumns: newColumns, columnOrder: newOrder, bookmarks: newBookmarks }
+    }),
+  renameCustomColumn: (id, newName) =>
+    set((state) => {
+      const newColumns = state.customColumns.map((col) =>
+        col.id === id ? { ...col, name: newName } : col
+      )
+      saveCustomColumns(newColumns)
+      return { customColumns: newColumns }
+    }),
+  reorderCustomColumns: (startIndex, endIndex) =>
+    set((state) => {
+      const newColumns = Array.from(state.customColumns)
+      const [removed] = newColumns.splice(startIndex, 1)
+      newColumns.splice(endIndex, 0, removed)
+      saveCustomColumns(newColumns)
+      return { customColumns: newColumns }
+    }),
+
+  // Column order
+  columnOrder: (() => {
+    const loaded = loadColumnOrder()
+    const customCols = loadCustomColumns()
+    // Merge custom column IDs if they're not in the loaded order
+    const allIds = [...loaded]
+    customCols.forEach(col => {
+      if (!allIds.includes(col.id)) {
+        allIds.push(col.id)
+      }
+    })
+    return allIds
+  })(),
+  reorderColumns: (startId, endId) =>
+    set((state) => {
+      const newOrder = Array.from(state.columnOrder)
+      const startIdx = newOrder.indexOf(startId)
+      const endIdx = newOrder.indexOf(endId)
+
+      if (startIdx !== -1 && endIdx !== -1) {
+        const [removed] = newOrder.splice(startIdx, 1)
+        newOrder.splice(endIdx, 0, removed)
+        saveColumnOrder(newOrder)
+        return { columnOrder: newOrder }
+      }
+      return state
+    }),
 
   // Keyboard Shortcuts
   isShortcutsOpen: false,

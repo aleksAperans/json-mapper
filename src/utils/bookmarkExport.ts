@@ -1,4 +1,4 @@
-import type { Bookmark, JsonValue } from '@/types'
+import type { Bookmark, JsonValue, CustomColumn } from '@/types'
 
 /**
  * Formats a JSON value for display in table/export
@@ -39,16 +39,23 @@ function escapeCSV(str: string): string {
 /**
  * Generates CSV content from bookmarks
  */
-export function generateCSV(bookmarks: Bookmark[]): string {
-  const headers = ['Source Path', 'Value', 'Type', 'Target Path', 'Transformation', 'Notes']
-  const rows = bookmarks.map(bookmark => [
-    escapeCSV(bookmark.path),
-    escapeCSV(formatValueForDisplay(bookmark.value)),
-    escapeCSV(bookmark.type),
-    escapeCSV(bookmark.targetPath),
-    escapeCSV(bookmark.transformation),
-    escapeCSV(bookmark.notes)
-  ])
+export function generateCSV(bookmarks: Bookmark[], customColumns: CustomColumn[] = []): string {
+  const baseHeaders = ['#', 'Source Path', 'Value', 'Type', 'Target Path', 'Notes']
+  const customHeaders = customColumns.map(col => col.name)
+  const headers = [...baseHeaders, ...customHeaders]
+
+  const rows = bookmarks.map((bookmark, index) => {
+    const baseRow = [
+      String(index + 1),
+      escapeCSV(bookmark.path),
+      escapeCSV(formatValueForDisplay(bookmark.value)),
+      escapeCSV(bookmark.type),
+      escapeCSV(bookmark.targetPath),
+      escapeCSV(bookmark.notes)
+    ]
+    const customRow = customColumns.map(col => escapeCSV(bookmark.customColumns[col.id] || ''))
+    return [...baseRow, ...customRow]
+  })
 
   const csvContent = [
     headers.join(','),
@@ -61,20 +68,37 @@ export function generateCSV(bookmarks: Bookmark[]): string {
 /**
  * Generates Markdown table from bookmarks
  */
-export function generateMarkdownTable(bookmarks: Bookmark[]): string {
+export function generateMarkdownTable(bookmarks: Bookmark[], customColumns: CustomColumn[] = []): string {
   if (bookmarks.length === 0) {
     return '# JSON Mapper Bookmarks\n\nNo bookmarks saved.'
   }
 
+  const baseHeaders = ['#', 'Source Path', 'Value', 'Type', 'Target Path', 'Notes']
+  const customHeaders = customColumns.map(col => col.name)
+  const allHeaders = [...baseHeaders, ...customHeaders]
+
+  const headerRow = `| ${allHeaders.join(' | ')} |`
+  const separatorRow = `| ${allHeaders.map(() => '---').join(' | ')} |`
+
   const header = `# JSON Mapper Bookmarks
 
-| Source Path | Value | Type | Target Path | Transformation | Notes |
-|-------------|-------|------|-------------|----------------|-------|
+${headerRow}
+${separatorRow}
 `
 
-  const rows = bookmarks.map(bookmark => {
+  const rows = bookmarks.map((bookmark, index) => {
     const valueFmt = formatValueForDisplay(bookmark.value)
-    return `| ${bookmark.path} | ${valueFmt} | ${bookmark.type} | ${bookmark.targetPath} | ${bookmark.transformation} | ${bookmark.notes} |`
+    const baseRow = [
+      String(index + 1),
+      bookmark.path,
+      valueFmt,
+      bookmark.type,
+      bookmark.targetPath,
+      bookmark.notes
+    ]
+    const customRow = customColumns.map(col => bookmark.customColumns[col.id] || '')
+    const allCells = [...baseRow, ...customRow]
+    return `| ${allCells.join(' | ')} |`
   }).join('\n')
 
   return header + rows

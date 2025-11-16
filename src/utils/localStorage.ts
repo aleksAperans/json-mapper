@@ -1,7 +1,8 @@
-import type { Bookmark } from '@/types'
+import type { Bookmark, CustomColumn } from '@/types'
 
 const STORAGE_KEY = 'json-mapper-bookmarks'
 const USER_PREFS_KEY = 'json-mapper-user-prefs'
+const CUSTOM_COLUMNS_KEY = 'json-mapper-custom-columns'
 
 export interface UserPreferences {
   hasVisitedBefore: boolean
@@ -22,7 +23,20 @@ export function loadBookmarks(): Bookmark[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (!stored) return []
-    return JSON.parse(stored) as Bookmark[]
+    const bookmarks = JSON.parse(stored) as Bookmark[]
+    // Migrate old bookmarks that don't have customColumns or have transformation field
+    return bookmarks.map((bookmark) => {
+      const migratedBookmark = { ...bookmark }
+      // Remove transformation field if it exists (for migration)
+      if ('transformation' in migratedBookmark) {
+        delete (migratedBookmark as any).transformation
+      }
+      // Add customColumns if missing
+      if (!migratedBookmark.customColumns) {
+        migratedBookmark.customColumns = {}
+      }
+      return migratedBookmark
+    })
   } catch (error) {
     console.error('Failed to load bookmarks from localStorage:', error)
     return []
@@ -81,4 +95,46 @@ export function markUserAsVisited(): void {
     firstVisitTimestamp: prefs.firstVisitTimestamp || now,
     lastVisitTimestamp: now
   })
+}
+
+// Custom columns functions
+export function saveCustomColumns(columns: CustomColumn[]): void {
+  try {
+    localStorage.setItem(CUSTOM_COLUMNS_KEY, JSON.stringify(columns))
+  } catch (error) {
+    console.error('Failed to save custom columns to localStorage:', error)
+  }
+}
+
+export function loadCustomColumns(): CustomColumn[] {
+  try {
+    const stored = localStorage.getItem(CUSTOM_COLUMNS_KEY)
+    if (!stored) return []
+    return JSON.parse(stored) as CustomColumn[]
+  } catch (error) {
+    console.error('Failed to load custom columns from localStorage:', error)
+    return []
+  }
+}
+
+// Column order functions
+const COLUMN_ORDER_KEY = 'json-mapper-column-order'
+
+export function saveColumnOrder(order: string[]): void {
+  try {
+    localStorage.setItem(COLUMN_ORDER_KEY, JSON.stringify(order))
+  } catch (error) {
+    console.error('Failed to save column order to localStorage:', error)
+  }
+}
+
+export function loadColumnOrder(): string[] {
+  try {
+    const stored = localStorage.getItem(COLUMN_ORDER_KEY)
+    if (!stored) return ['source-path', 'value', 'type', 'target-path', 'notes']
+    return JSON.parse(stored) as string[]
+  } catch (error) {
+    console.error('Failed to load column order from localStorage:', error)
+    return ['source-path', 'value', 'type', 'target-path', 'notes']
+  }
 }

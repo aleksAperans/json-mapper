@@ -18,24 +18,25 @@ export function BookmarksModal() {
     setIsBookmarksOpen,
     clearBookmarks,
     setCopyNotification,
+    customColumns,
   } = useAppStore()
 
   const handleExportCSV = () => {
-    const csv = generateCSV(bookmarks)
+    const csv = generateCSV(bookmarks, customColumns)
     downloadFile(csv, 'json-mapper-bookmarks.csv', 'text/csv')
     setCopyNotification(true, 'Bookmarks exported as CSV')
     setTimeout(() => setCopyNotification(false), 2000)
   }
 
   const handleExportMarkdown = () => {
-    const markdown = generateMarkdownTable(bookmarks)
+    const markdown = generateMarkdownTable(bookmarks, customColumns)
     downloadFile(markdown, 'json-mapper-bookmarks.md', 'text/markdown')
     setCopyNotification(true, 'Bookmarks exported as Markdown')
     setTimeout(() => setCopyNotification(false), 2000)
   }
 
   const handleCopyMarkdown = async () => {
-    const markdown = generateMarkdownTable(bookmarks)
+    const markdown = generateMarkdownTable(bookmarks, customColumns)
     try {
       await navigator.clipboard.writeText(markdown)
       setCopyNotification(true, 'Markdown table copied to clipboard')

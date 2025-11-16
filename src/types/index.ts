@@ -70,6 +70,12 @@ export interface Bookmark {
   timestamp: number
   type: string // Data type: string, number, array, object, boolean, null
   targetPath: string // Destination path in target system
-  transformation: string // Data transformation rules
   notes: string // General notes
+  customColumns: Record<string, string> // User-defined columns
+}
+
+// Custom column definition for bookmarks table
+export interface CustomColumn {
+  id: string
+  name: string
 }
