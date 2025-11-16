@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react'
 import { useAppStore } from '@/store/appStore'
-import { Copy, Download, FileCode, FileText, Table, Clipboard, FileUp, FileJson, Trash2 } from 'lucide-react'
+import { Copy, Download, FileCode, FileText, Table, Clipboard, FileUp, FileJson, Trash2, Minimize } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { copyToClipboard } from '@/utils/clipboard'
 import yaml from 'js-yaml'
 import convert from 'xml-js'
 
-type ConvertFormat = 'yaml' | 'xml' | 'csv'
+type ConvertFormat = 'yaml' | 'xml' | 'csv' | 'minify'
 
 // Custom CSV converter
 function jsonToCSV(data: any): string {
@@ -118,6 +118,9 @@ export function ConvertView({ onPasteFromClipboard, onFileUpload, onLoadExample 
         case 'csv':
           return jsonToCSV(jsonData)
 
+        case 'minify':
+          return JSON.stringify(jsonData)
+
         default:
           return ''
       }
@@ -167,6 +170,12 @@ export function ConvertView({ onPasteFromClipboard, onFileUpload, onLoadExample 
       label: 'CSV',
       description: 'Convert to CSV format (flattened)',
       icon: Table,
+    },
+    {
+      value: 'minify',
+      label: 'Minify',
+      description: 'Compact JSON (remove whitespace)',
+      icon: Minimize,
     },
   ]
 
@@ -289,7 +298,9 @@ export function ConvertView({ onPasteFromClipboard, onFileUpload, onLoadExample 
             </div>
           </div>
         ) : (
-          <pre className="font-mono text-sm bg-muted/30 rounded-lg p-4 overflow-x-auto">
+          <pre className={`font-mono text-sm bg-muted/30 rounded-lg p-4 ${
+            selectedFormat === 'minify' ? 'whitespace-pre-wrap break-all' : 'overflow-x-auto'
+          }`}>
             <code>{convertedOutput}</code>
           </pre>
         )}
